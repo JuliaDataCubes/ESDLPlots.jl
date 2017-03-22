@@ -106,6 +106,6 @@ If a dimension is not the `vsaxis` or `alongaxis` or `group` and is not fixed th
 """
 function plotScatter{T}(cube::AbstractCubeData{T};group=nothing,vsaxis=VariableAxis,xaxis=nothing,yaxis=nothing,alongaxis=nothing,kwargs...)
 
-  return plotGeneric(ScatterPlot(vsaxis,alongaxis,group,xaxis,yaxis),cube)
+  return plotGeneric(ScatterPlot(vsaxis,alongaxis,group,xaxis,yaxis),cube;kwargs...)
 
 end
