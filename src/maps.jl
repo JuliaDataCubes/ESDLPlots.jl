@@ -250,7 +250,7 @@ function val2col(x,m,colorm,mi,ma,misscol,oceancol)
   N=length(colorm)
   #println(x)
   if !isnan(x) && x<typemax(x) && m==VALID || m==FILLED
-    i=min(N,max(1,ceil(Int,(x-mi)/(ma-mi)*N)))
+    i=ceil(Int,min(N,max(1.0,(x-mi)/(ma-mi)*N)))
     return colorm[i]
   elseif (m & OCEAN)==OCEAN
     return oceancol
