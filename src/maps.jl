@@ -14,9 +14,9 @@ type MAPPlotRGB <: MAPPlot
   cType
 end
 plotAxVars(p::MAPPlotRGB)=[
-  FixedAx(p.xaxis,:ilon,"X Axis",true,false),
-  FixedAx(p.yaxis,:ilat,"Y Axis",true,false),
-  FixedAx(p.rgbAxis,:irgb,"RGB Axis", true, true),
+  FixedAx(p.xaxis,:ilon,"X Axis",true,false,1),
+  FixedAx(p.yaxis,:ilat,"Y Axis",true,false,2),
+  FixedAx(p.rgbAxis,:irgb,"RGB Axis", true, true,-1),
   FixedVar(p.rgbAxis,p.c_1,:c_1,channel_names(p.cType)[1],true),
   FixedVar(p.rgbAxis,p.c_2,:c_2,channel_names(p.cType)[2],true),
   FixedVar(p.rgbAxis,p.c_3,:c_3,channel_names(p.cType)[3],true)
@@ -43,7 +43,7 @@ getafterEx(p::MAPPlotRGB)=p.dmin==p.dmax ? :((mir,mar,mig,mag,mib,mab)=(getMinMa
 
 abstract MAPPlotMapped <: MAPPlot
 
-plotAxVars(p::MAPPlotMapped)=[FixedAx(p.xaxis,:ilon,"X Axis",true,false),FixedAx(p.yaxis,:ilat,"Y Axis",true,false)]
+plotAxVars(p::MAPPlotMapped)=[FixedAx(p.xaxis,:ilon,"X Axis",true,false,1),FixedAx(p.yaxis,:ilat,"Y Axis",true,false,2)]
 match_subCubeDims(::MAPPlotMapped) = quote (d==ilon || d==ilat) => length(axlist[d]); _=>1 end
 match_indstart(::MAPPlotMapped)    = quote (d==ilon || d==ilat) => 1; _=> axVal2Index(axlist[d],v_d,fuzzy=true) end
 match_indend(::MAPPlotMapped)      = quote (d==ilon || d==ilat) => subcubedims[d]; _=> axVal2Index(axlist[d],v_d,fuzzy=true) end

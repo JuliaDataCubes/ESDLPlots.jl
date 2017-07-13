@@ -3,7 +3,7 @@ type XYPlot <: CABLABPlot
   group
 
 end
-plotAxVars(p::XYPlot)=[FixedAx(p.xaxis,:ixaxis,"X Axis",true,false),FixedAx(p.group,:igroup,"Group",false,false)]
+plotAxVars(p::XYPlot)=[FixedAx(p.xaxis,:ixaxis,"X Axis",true,false,1),FixedAx(p.group,:igroup,"Group",false,false,2)]
 match_subCubeDims(::XYPlot) = quote (d==ixaxis || d==igroup) => length(axlist[d]); _=>1 end
 match_indstart(::XYPlot)    = quote (d==ixaxis || d==igroup) => 1; _=> axVal2Index(axlist[d],v_d,fuzzy=true) end
 match_indend(::XYPlot)      = quote (d==ixaxis || d==igroup) => subcubedims[d]; _=> axVal2Index(axlist[d],v_d,fuzzy=true) end
@@ -49,9 +49,9 @@ type ScatterPlot <: CABLABPlot
   c_2
 end
 plotAxVars(p::ScatterPlot)=[
-  FixedAx(p.vsaxis,:ivsaxis,"VS Axis",true,true),
-  FixedAx(p.alongaxis,:ialongaxis,"Along",true,false),
-  FixedAx(p.group,:igroup,"Group",false,false),
+  FixedAx(p.vsaxis,:ivsaxis,"VS Axis",true,true,-1),
+  FixedAx(p.alongaxis,:ialongaxis,"Along",true,false,1),
+  FixedAx(p.group,:igroup,"Group",false,false,2),
   FixedVar(p.vsaxis,p.c_1,:c_1,"X Axis",true),
   FixedVar(p.vsaxis,p.c_2,:c_2,"Y Axis",true)
   ]

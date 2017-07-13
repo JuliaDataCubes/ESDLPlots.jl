@@ -39,6 +39,7 @@ type FixedAx
   widgetlabel::String
   musthave::Bool
   isimmu::Bool
+  position::Int
 end
 
 type FixedVar
@@ -164,9 +165,18 @@ function plotGeneric{T}(plotObj::CABLABPlot, cube::CubeAPI.AbstractCubeData{T};k
   signals=Signal[]
 
   pAxVars=plotAxVars(plotObj)
+    
 
   foreach(t->setPlotAxis(t,axlist,fixedvarsEx,fixedAxes),pAxVars)
 
+  positionalFixed = filter(i->isa(i,FixedAx) && i.position>0 && i.axis>0,pAxVars)
+  positions = map(i->i.axis,positionalFixed)
+  if !issorted(positions)
+       transposeEx=:((a_f,m_f) = (transpose(a_f),transpose(m_f)))
+  else
+    transposeEx=:()
+  end  
+    
   for (sy,val) in kwargs
     ix = findAxis(string(sy),axlist)
     if ix > 0
@@ -199,6 +209,7 @@ function plotGeneric{T}(plotObj::CABLABPlot, cube::CubeAPI.AbstractCubeData{T};k
       indend_f   = @ntuple $nax d->$(makeifs(match_indend(plotObj).args))
       _read(cube,(a_f,m_f),CartesianRange(CartesianIndex(indstart_f),CartesianIndex(indend_f)))
       a_f,m_f = reshape(a_f,sd2...),reshape(m_f,sd2...)
+      $transposeEx
     end
 
     $(getafterEx(plotObj))
@@ -210,6 +221,7 @@ function plotGeneric{T}(plotObj::CABLABPlot, cube::CubeAPI.AbstractCubeData{T};k
   end
   lambda = Expr(:(->), Expr(:tuple, argvars...),plotfun)
   liftex = Expr(:call,:map,lambda,signals...)
+  #return(liftex)
   myfun=eval(quote
   local li
   li(cube)=$liftex
