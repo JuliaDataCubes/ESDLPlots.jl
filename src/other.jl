@@ -4,9 +4,9 @@ type XYPlot <: CABLABPlot
 
 end
 plotAxVars(p::XYPlot)=[FixedAx(p.xaxis,:ixaxis,"X Axis",true,false),FixedAx(p.group,:igroup,"Group",false,false)]
-match_subCubeDims(::XYPlot) = quote (d==ixaxis || d==igroup) => length(axlist[d]); _=>1 end
-match_indstart(::XYPlot)    = quote (d==ixaxis || d==igroup) => 1; _=> axVal2Index(axlist[d],v_d,fuzzy=true) end
-match_indend(::XYPlot)      = quote (d==ixaxis || d==igroup) => subcubedims[d]; _=> axVal2Index(axlist[d],v_d,fuzzy=true) end
+match_subCubeDims(::XYPlot) = quote (d==ixaxis || d==igroup) => length(axlist[d]); defa=>1 end
+match_indstart(::XYPlot)    = quote (d==ixaxis || d==igroup) => 1; defa=> axVal2Index(axlist[d],v_d,fuzzy=true) end
+match_indend(::XYPlot)      = quote (d==ixaxis || d==igroup) => subcubedims[d]; defa=> axVal2Index(axlist[d],v_d,fuzzy=true) end
 plotCall(p::XYPlot) = quote
   if igroup > 0
     igroup < ixaxis && (a_1=transpose(a_1))
@@ -55,9 +55,9 @@ plotAxVars(p::ScatterPlot)=[
   FixedVar(p.vsaxis,p.c_1,:c_1,"X Axis",true),
   FixedVar(p.vsaxis,p.c_2,:c_2,"Y Axis",true)
   ]
-match_subCubeDims(::ScatterPlot) = quote (d==ialongaxis || d==igroup) => length(axlist[d]); _=>1 end
-match_indstart(::ScatterPlot)    = quote (d==ialongaxis || d==igroup) => 1; d==ivsaxis => axVal2Index(axlist[d],c_f,fuzzy=true); _=> axVal2Index(axlist[d],v_d,fuzzy=true) end
-match_indend(::ScatterPlot)      = quote (d==ialongaxis || d==igroup) => subcubedims[d]; d==ivsaxis => axVal2Index(axlist[d],c_f,fuzzy=true); _=> axVal2Index(axlist[d],v_d,fuzzy=true) end
+match_subCubeDims(::ScatterPlot) = quote (d==ialongaxis || d==igroup) => length(axlist[d]); defa=>1 end
+match_indstart(::ScatterPlot)    = quote (d==ialongaxis || d==igroup) => 1; d==ivsaxis => axVal2Index(axlist[d],c_f,fuzzy=true); defa=> axVal2Index(axlist[d],v_d,fuzzy=true) end
+match_indend(::ScatterPlot)      = quote (d==ialongaxis || d==igroup) => subcubedims[d]; d==ivsaxis => axVal2Index(axlist[d],c_f,fuzzy=true); defa=> axVal2Index(axlist[d],v_d,fuzzy=true) end
 plotCall(p::ScatterPlot) = quote
   nPoints = length(a_1)
   pointSize = min(5000/nPoints,3)

@@ -1,4 +1,4 @@
-abstract MAPPlot <: CABLABPlot
+abstract type MAPPlot <: CABLABPlot end
 
 type MAPPlotRGB <: MAPPlot
   xaxis
@@ -21,9 +21,9 @@ plotAxVars(p::MAPPlotRGB)=[
   FixedVar(p.rgbAxis,p.c_2,:c_2,channel_names(p.cType)[2],true),
   FixedVar(p.rgbAxis,p.c_3,:c_3,channel_names(p.cType)[3],true)
   ]
-match_subCubeDims(::MAPPlotRGB) = quote (d==ilon || d==ilat) => length(axlist[d]);_=>1 end
-match_indstart(::MAPPlotRGB)    = quote (d==ilon || d==ilat) => 1;d==irgb => axVal2Index(axlist[d],c_f,fuzzy=true) ; _=> axVal2Index(axlist[d],v_d,fuzzy=true) end
-match_indend(::MAPPlotRGB)   = quote (d==ilon || d==ilat) => subcubedims[d];d==irgb => axVal2Index(axlist[d],c_f,fuzzy=true) ; _=> axVal2Index(axlist[d],v_d,fuzzy=true) end
+match_subCubeDims(::MAPPlotRGB) = quote (d==ilon || d==ilat) => length(axlist[d]);defa=>1 end
+match_indstart(::MAPPlotRGB)    = quote (d==ilon || d==ilat) => 1;d==irgb => axVal2Index(axlist[d],c_f,fuzzy=true) ; defa=> axVal2Index(axlist[d],v_d,fuzzy=true) end
+match_indend(::MAPPlotRGB)   = quote (d==ilon || d==ilat) => subcubedims[d];d==irgb => axVal2Index(axlist[d],c_f,fuzzy=true) ; defa=> axVal2Index(axlist[d],v_d,fuzzy=true) end
 nplotCubes(::MAPPlotRGB)=3
 function getFixedVars(p::MAPPlotRGB,cube)
   quote
@@ -41,12 +41,12 @@ getafterEx(p::MAPPlotRGB)=p.dmin==p.dmax ? :((mir,mar,mig,mag,mib,mab)=(getMinMa
 
 
 
-abstract MAPPlotMapped <: MAPPlot
+abstract type MAPPlotMapped <: MAPPlot end
 
 plotAxVars(p::MAPPlotMapped)=[FixedAx(p.xaxis,:ilon,"X Axis",true,false),FixedAx(p.yaxis,:ilat,"Y Axis",true,false)]
-match_subCubeDims(::MAPPlotMapped) = quote (d==ilon || d==ilat) => length(axlist[d]); _=>1 end
-match_indstart(::MAPPlotMapped)    = quote (d==ilon || d==ilat) => 1; _=> axVal2Index(axlist[d],v_d,fuzzy=true) end
-match_indend(::MAPPlotMapped)      = quote (d==ilon || d==ilat) => subcubedims[d]; _=> axVal2Index(axlist[d],v_d,fuzzy=true) end
+match_subCubeDims(::MAPPlotMapped) = quote (d==ilon || d==ilat) => length(axlist[d]); defa=>1 end
+match_indstart(::MAPPlotMapped)    = quote (d==ilon || d==ilat) => 1; defa=> axVal2Index(axlist[d],v_d,fuzzy=true) end
+match_indend(::MAPPlotMapped)      = quote (d==ilon || d==ilat) => subcubedims[d]; defa=> axVal2Index(axlist[d],v_d,fuzzy=true) end
 nplotCubes(::MAPPlotMapped)=1
 max_indim(::MAPPlot)=2
 min_indim(::MAPPlot)=2
@@ -70,7 +70,7 @@ function getFixedVars(p::MAPPlotCategory,cube)
     legPos=:right
   end
 end
-plotCall(::MAPPlotCategory) = :(_makeMap(a_1,m_1,0.0,0.0,colorm,oceancol,misscol,legPos,iscategorical,false))
+plotCall(::MAPPlotCategory) = :(_makeMap(a_1,m_1,0.0,0.0,colorm,oceancol,misscol,legPos,iscategorical,false,[]))
 
 
 type MAPPlotContin <: MAPPlotMapped
@@ -180,9 +180,9 @@ end
 
 using ColorTypes
 channel_max(d::DataType)="Colortype $d not yet added"
-typealias RGBlike Union{Type{XYZ},Type{RGB},Type{xyY}}
-typealias HSVlike Union{Type{HSV},Type{HSI},Type{HSL}}
-typealias Lablike Union{Type{Lab},Type{Luv}}
+const RGBlike=Union{Type{XYZ},Type{RGB},Type{xyY}}
+const HSVlike=Union{Type{HSV},Type{HSI},Type{HSL}}
+const Lablike=Union{Type{Lab},Type{Luv}}
 channel_min(::RGBlike)=(0.0,0.0,0.0)
 channel_max(::RGBlike)=(1.0,1.0,1.0)
 channel_min(::Lablike)=(0.0,-170.0,-100.0)
@@ -308,9 +308,9 @@ end
 function makeifs(alist)
     filter!(i->i.head!=:line,alist)
     if length(alist)==1
-        (alist[1].head==:(=>) && alist[1].args[1]==:(_)) || error("Expecting _=>something as default argument")
-        return (alist[1].args[2])
+        (alist[1].head==:call && alist[1].args[1]==:(=>) && alist[1].args[2]==:defa) || error("Expecting defa=>something as default argument")
+        return (alist[1].args[3])
     else
-        return Expr(:if,alist[1].args[1],alist[1].args[2],makeifs(alist[2:end]))
+        return Expr(:if,alist[1].args[2],alist[1].args[3],makeifs(alist[2:end]))
     end
 end
