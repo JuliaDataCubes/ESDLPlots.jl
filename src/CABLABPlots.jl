@@ -23,10 +23,10 @@ import PlotUtils: optimize_ticks, cgrad
 import Compose: rectangle, text, line, compose, context, stroke, svgattribute, bitmap, HCenter, VBottom, HRight, VCenter
 
 
-typealias U8 Normed{UInt8,8}
+const U8=Normed{UInt8,8}
 
 
-abstract CABLABPlot
+abstract type CABLABPlot end
 "Expression to evaluate after the data is loaded"
 getafterEx(::CABLABPlot)=Expr(:block)
 
@@ -189,14 +189,14 @@ function plotGeneric{T}(plotObj::CABLABPlot, cube::CubeAPI.AbstractCubeData{T};k
     $fixedvarsEx
     ndim=$nax
 
-    subcubedims = @ntuple $nax d->$(makeifs(match_subCubeDims(plotObj).args))
-    sd2 = filter(i->i>1,subcubedims)
+    subcubedims = Base.Cartesian.@ntuple $nax d->$(makeifs(match_subCubeDims(plotObj).args))
+    sd2 = Iterators.filter(i->i>1,subcubedims)
 
-    @nexprs $nCubes f->begin
+    Base.Cartesian.@nexprs $nCubes f->begin
       a_f        = zeros(eltype(cube), subcubedims)
       m_f        = zeros(UInt8,        subcubedims)
-      indstart_f = @ntuple $nax d->$(makeifs(match_indstart(plotObj).args))
-      indend_f   = @ntuple $nax d->$(makeifs(match_indend(plotObj).args))
+      indstart_f = Base.Cartesian.@ntuple $nax d->$(makeifs(match_indstart(plotObj).args))
+      indend_f   = Base.Cartesian.@ntuple $nax d->$(makeifs(match_indend(plotObj).args))
       _read(cube,(a_f,m_f),CartesianRange(CartesianIndex(indstart_f),CartesianIndex(indend_f)))
       a_f,m_f = reshape(a_f,sd2...),reshape(m_f,sd2...)
     end
@@ -206,16 +206,18 @@ function plotGeneric{T}(plotObj::CABLABPlot, cube::CubeAPI.AbstractCubeData{T};k
   end
   if length(argvars)==0
     x=eval(:(cube->$plotfun))
-    return x(cube)
+    return eval(:($x($cube)))
   end
   lambda = Expr(:(->), Expr(:tuple, argvars...),plotfun)
   liftex = Expr(:call,:map,lambda,signals...)
   myfun=eval(quote
-  local li
-  li(cube)=$liftex
-end)
-foreach(display,widgets)
-display(myfun(cube))
+    local li
+    li(cube)=$liftex
+  end)
+  #println(macroexpand(liftex))
+  foreach(display,widgets)
+  r = eval(:($myfun($cube)))
+  display(r)
 end
 
 end # module
