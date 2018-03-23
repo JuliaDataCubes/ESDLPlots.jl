@@ -77,10 +77,10 @@ getWidget{T<:Real}(x::RangeAxis{T};label=axname(x)) = step(x.values) > 0 ? slide
 getWidget(x::RangeAxis;label=axname(x))             = slider(1:length(x),label=label)
 getWidget(x::SpatialPointAxis;label="Spatial Point")= slider(1:length(x),label=label)
 
-plotTS(x;kwargs...)=plotXY(x,xaxis=TimeAxis;kwargs...)
+plotTS(x;kwargs...)=plotXY(x;xaxis=TimeAxis,kwargs...)
 
 function setPlotAxis(a::FixedAx,axlist,fixedvarsEx,fixedAxes)
-  ix=findAxis(a.axis,axlist)
+  ix=a.axis==nothing ? 0 : findAxis(a.axis,axlist)
   if ix>0
     push!(fixedvarsEx.args,:($(a.axsym)=$ix))
     push!(fixedAxes,axlist[ix])
