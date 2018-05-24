@@ -8,7 +8,7 @@ import CABLAB.DAT
 import CABLAB.DAT: findAxis,getFrontPerm
 import CABLAB.Cubes.Axes.axname
 import Reactive: Signal
-import Interact: slider, dropdown, signal, togglebutton, togglebuttons
+import Interact: slider, dropdown, signal, togglebutton, togglebuttons, selection_slider
 import Colors: RGB, @colorant_str, colormap,  distinguishable_colors
 import FixedPointNumbers: Normed
 import Base.Cartesian: @ntuple,@nexprs
@@ -74,7 +74,7 @@ end
 
 getWidget(x::CategoricalAxis;label=axname(x))       = dropdown(Dict(zip(x.values,1:length(x.values))),label=label)
 getWidget{T<:Real}(x::RangeAxis{T};label=axname(x)) = step(x.values) > 0 ? slider(x.values,label=label) : slider(reverse(x.values),label=label)
-getWidget(x::RangeAxis;label=axname(x))             = slider(1:length(x),label=label)
+getWidget(x::RangeAxis;label=axname(x))             = selection_slider(x.values,label=label)
 getWidget(x::SpatialPointAxis;label="Spatial Point")= slider(1:length(x),label=label)
 
 plotTS(x;kwargs...)=plotXY(x;xaxis=TimeAxis,kwargs...)
