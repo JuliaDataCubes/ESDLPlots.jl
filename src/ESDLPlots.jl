@@ -1,12 +1,12 @@
-module CABLABPlots
+module ESDLPlots
 export plotTS, plotMAP, plotXY, plotScatter, plotMAPRGB
 export plotlyjs, gadfly, gr, pyplot
-importall CABLAB.Cubes
-importall CABLAB.CubeAPI
-importall CABLAB.CubeAPI.Mask
-import CABLAB.DAT
-import CABLAB.DAT: findAxis,getFrontPerm
-import CABLAB.Cubes.Axes.axname
+importall ESDL.Cubes
+importall ESDL.CubeAPI
+importall ESDL.CubeAPI.Mask
+import ESDL.DAT
+import ESDL.DAT: findAxis,getFrontPerm
+import ESDL.Cubes.Axes.axname
 import Reactive: Signal
 import Interact: slider, dropdown, signal, togglebutton, togglebuttons, selection_slider
 import Colors: RGB, @colorant_str, colormap,  distinguishable_colors
@@ -26,12 +26,12 @@ import Compose: rectangle, text, line, compose, context, stroke, svgattribute, b
 const U8=Normed{UInt8,8}
 
 
-abstract type CABLABPlot end
+abstract type ESDLPlot end
 "Expression to evaluate after the data is loaded"
-getafterEx(::CABLABPlot)=Expr(:block)
+getafterEx(::ESDLPlot)=Expr(:block)
 
 "Setting fixed variables"
-getFixedVars(::CABLABPlot,cube)=Expr(:block)
+getFixedVars(::ESDLPlot,cube)=Expr(:block)
 
 type FixedAx
   axis
@@ -149,7 +149,7 @@ typed_dminmax2{T<:AbstractFloat}(::Type{T},dmin,dmax)=(isa(dmin,Tuple) ? (Float6
 
 
 
-function plotGeneric{T}(plotObj::CABLABPlot, cube::CubeAPI.AbstractCubeData{T};kwargs...)
+function plotGeneric{T}(plotObj::ESDLPlot, cube::CubeAPI.AbstractCubeData{T};kwargs...)
 
 
   axlist=axes(cube)

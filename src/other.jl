@@ -1,4 +1,4 @@
-type XYPlot <: CABLABPlot
+type XYPlot <: ESDLPlot
   xaxis
   group
 
@@ -41,7 +41,7 @@ function plotXY{T}(cube::AbstractCubeData{T};group=nothing,xaxis=nothing,kwargs.
 
 end
 
-type ScatterPlot <: CABLABPlot
+type ScatterPlot <: ESDLPlot
   vsaxis
   alongaxis
   group

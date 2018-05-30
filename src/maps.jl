@@ -1,4 +1,4 @@
-abstract type MAPPlot <: CABLABPlot end
+abstract type MAPPlot <: ESDLPlot end
 
 type MAPPlotRGB <: MAPPlot
   xaxis

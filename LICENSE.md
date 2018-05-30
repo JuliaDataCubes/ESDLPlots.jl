@@ -1,4 +1,4 @@
-The CABLABPlots.jl package is licensed under the MIT "Expat" License:
+The ESDLPlots.jl package is licensed under the MIT "Expat" License:
 
 > Copyright (c) 2017: Fabian Gans.
 > 
