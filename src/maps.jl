@@ -60,6 +60,7 @@ type MAPPlotCategory <: MAPPlotMapped
   misscol
   xaxis
   yaxis
+  im_only
 end
 function getFixedVars(p::MAPPlotCategory,cube)
   quote
@@ -70,7 +71,9 @@ function getFixedVars(p::MAPPlotCategory,cube)
     legPos=:right
   end
 end
-plotCall(::MAPPlotCategory) = :(_makeMap(a_1,m_1,0.0,0.0,colorm,oceancol,misscol,legPos,iscategorical,false,[]))
+plotCall(p::MAPPlotCategory) = p.im_only ?
+  :(_makeMaprgb(a_1,m_1,0.0,0.0,colorm,oceancol,misscol,legPos,iscategorical,false,[])[5]) :
+  :(_makeMap(a_1,m_1,0.0,0.0,colorm,oceancol,misscol,legPos,iscategorical,false,[]))
 
 
 type MAPPlotContin <: MAPPlotMapped
@@ -83,6 +86,7 @@ type MAPPlotContin <: MAPPlotMapped
   xaxis
   yaxis
   tickspos
+  im_only
 end
 function getFixedVars(p::MAPPlotContin,cube)
   quote
@@ -96,7 +100,9 @@ function getFixedVars(p::MAPPlotContin,cube)
   end
 end
 getafterEx(p::MAPPlotContin)=p.dmin==p.dmax ? :((mi,ma)=getMinMax(a_1,m_1)) : :(mi=$(p.dmin);ma=$(p.dmax))
-plotCall(::MAPPlotContin)   = :(_makeMap(a_1,m_1,mi,ma,colorm,oceancol,misscol,legPos,iscategorical,symmetric, tickspos))
+plotCall(p::MAPPlotContin)   = p.im_only ?
+:(_makeMaprgb(a_1,m_1,mi,ma,colorm,oceancol,misscol,legPos,iscategorical,symmetric, tickspos)[5]) :
+:(_makeMap(a_1,m_1,mi,ma,colorm,oceancol,misscol,legPos,iscategorical,symmetric, tickspos))
 
 """
 `plotMAP(cube::AbstractCubeData; dmin=datamin, dmax=datamax, colorm=colormap("oranges"), oceancol=colorant"darkblue", misscol=colorant"gray", kwargs...)`
@@ -116,7 +122,7 @@ Map plotting tool for cube objects, can be called on any type of cube data
 If a dimension is neither longitude or latitude and is not fixed through an additional keyword, a slider or dropdown menu will appear to select the axis value.
 """
 function plotMAP{T}(cube::CubeAPI.AbstractCubeData{T};xaxis=LonAxis, yaxis=LatAxis, dmin=zero(T),dmax=zero(T),
-  colorm=:inferno,oceancol=colorant"darkblue",misscol=colorant"gray",symmetric=false, tickspos=[],kwargs...)
+  colorm=:inferno,oceancol=colorant"darkblue",misscol=colorant"gray",symmetric=false, tickspos=[],im_only=false,kwargs...)
 
   isa(colorm,Symbol) && (colorm=get(namedcolms,colorm,namedcolms[:inferno]))
   dmin,dmax=typed_dminmax(T,dmin,dmax)
@@ -129,9 +135,9 @@ function plotMAP{T}(cube::CubeAPI.AbstractCubeData{T};xaxis=LonAxis, yaxis=LatAx
     _colorm  = distinguishable_colors(length(labels)+2,[misscol,oceancol])[3:end]
     colorm   = Dict(k=>_colorm[i] for (i,k) in enumerate(keys(labels)))
     colorm2  = Dict(k=>_colorm[i] for (i,k) in enumerate(values(labels)))
-    plotGeneric(MAPPlotCategory(colorm,colorm2,oceancol,misscol,xaxis,yaxis),cube;kwargs...)
+    plotGeneric(MAPPlotCategory(colorm,colorm2,oceancol,misscol,xaxis,yaxis,im_only),cube;kwargs...)
   else
-    plotGeneric(MAPPlotContin(colorm,dmin,dmax,symmetric,oceancol,misscol,xaxis,yaxis,tickspos),cube;kwargs...)
+    plotGeneric(MAPPlotContin(colorm,dmin,dmax,symmetric,oceancol,misscol,xaxis,yaxis,tickspos,im_only),cube;kwargs...)
   end
 end
 
@@ -287,13 +293,22 @@ function val2col(x,m,colorm::Dict,misscol,oceancol)
   end
 end
 
+function _makeMaprgb{T}(a::Array{T},m,mi,ma,colorm,oceancol,misscol,legPos,iscategorical,symmetric,tickspos)
+  if iscategorical
+    colorm,colorm2=colorm
+  else
+    mi==ma && ((mi,ma)=getMinMax(a,m,symmetric=symmetric))
+    colorm2=nothing
+  end
+  colorm, colorm2, mi,ma,getRGBAR(a,m,colorm,convert(T,mi),convert(T,ma),misscol,oceancol)
+end
 function _makeMap{T}(a::Array{T},m,mi,ma,colorm,oceancol,misscol,legPos,iscategorical,symmetric,tickspos)
   if iscategorical
     colorm,colorm2=colorm
   else
     mi==ma && ((mi,ma)=getMinMax(a,m,symmetric=symmetric))
   end
-  rgbar = getRGBAR(a,m,colorm,convert(T,mi),convert(T,ma),misscol,oceancol)
+  colorm, colorm2, mi,ma,rgbar = _makeMaprgb(a,m,mi,ma,colorm,oceancol,misscol,legPos,iscategorical,symmetric,tickpos)
   pngbuf=IOBuffer()
   show(pngbuf,"image/png",rgbar)
   legheight=legPos==:bottom ? max(0.1*Measures.h,1.6Measures.cm) : 0Measures.h
