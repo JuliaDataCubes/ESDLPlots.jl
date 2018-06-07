@@ -44,9 +44,9 @@ getafterEx(p::MAPPlotRGB)=p.dmin==p.dmax ? :((mir,mar,mig,mag,mib,mab)=(getMinMa
 abstract type MAPPlotMapped <: MAPPlot end
 
 plotAxVars(p::MAPPlotMapped)=[FixedAx(p.xaxis,:ilon,"X Axis",true,false,1),FixedAx(p.yaxis,:ilat,"Y Axis",true,false,2)]
-match_subCubeDims(::MAPPlotMapped) = quote (d==ilon || d==ilat) => length(axlist[d]); _=>1 end
-match_indstart(::MAPPlotMapped)    = quote (d==ilon || d==ilat) => 1; _=> axVal2Index(axlist[d],v_d,fuzzy=true) end
-match_indend(::MAPPlotMapped)      = quote (d==ilon || d==ilat) => subcubedims[d]; _=> axVal2Index(axlist[d],v_d,fuzzy=true) end
+match_subCubeDims(::MAPPlotMapped) = quote (d==ilon || d==ilat) => length(axlist[d]); defa=>1 end
+match_indstart(::MAPPlotMapped)    = quote (d==ilon || d==ilat) => 1; defa=> axVal2Index(axlist[d],v_d,fuzzy=true) end
+match_indend(::MAPPlotMapped)      = quote (d==ilon || d==ilat) => subcubedims[d]; defa=> axVal2Index(axlist[d],v_d,fuzzy=true) end
 nplotCubes(::MAPPlotMapped)=1
 max_indim(::MAPPlot)=2
 min_indim(::MAPPlot)=2

@@ -4,9 +4,9 @@ type XYPlot <: ESDLPlot
 
 end
 plotAxVars(p::XYPlot)=[FixedAx(p.xaxis,:ixaxis,"X Axis",true,false,1),FixedAx(p.group,:igroup,"Group",false,false,2)]
-match_subCubeDims(::XYPlot) = quote (d==ixaxis || d==igroup) => length(axlist[d]); _=>1 end
-match_indstart(::XYPlot)    = quote (d==ixaxis || d==igroup) => 1; _=> axVal2Index(axlist[d],v_d,fuzzy=true) end
-match_indend(::XYPlot)      = quote (d==ixaxis || d==igroup) => subcubedims[d]; _=> axVal2Index(axlist[d],v_d,fuzzy=true) end
+match_subCubeDims(::XYPlot) = quote (d==ixaxis || d==igroup) => length(axlist[d]); defa=>1 end
+match_indstart(::XYPlot)    = quote (d==ixaxis || d==igroup) => 1; defa=> axVal2Index(axlist[d],v_d,fuzzy=true) end
+match_indend(::XYPlot)      = quote (d==ixaxis || d==igroup) => subcubedims[d]; defa=> axVal2Index(axlist[d],v_d,fuzzy=true) end
 plotCall(p::XYPlot) = quote
   if igroup > 0
     igroup < ixaxis && (a_1=transpose(a_1))
