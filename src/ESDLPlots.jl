@@ -165,7 +165,6 @@ function plotGeneric{T}(plotObj::ESDLPlot, cube::CubeAPI.AbstractCubeData{T};kwa
   signals=Signal[]
 
   pAxVars=plotAxVars(plotObj)
-    
 
   foreach(t->setPlotAxis(t,axlist,fixedvarsEx,fixedAxes),pAxVars)
 
@@ -175,8 +174,8 @@ function plotGeneric{T}(plotObj::ESDLPlot, cube::CubeAPI.AbstractCubeData{T};kwa
        transposeEx=:((a_f,m_f) = (transpose(a_f),transpose(m_f)))
   else
     transposeEx=:()
-  end  
-    
+  end
+
   for (sy,val) in kwargs
     ix = findAxis(string(sy),axlist)
     if ix > 0

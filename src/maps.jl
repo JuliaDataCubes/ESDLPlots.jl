@@ -308,7 +308,7 @@ function _makeMap{T}(a::Array{T},m,mi,ma,colorm,oceancol,misscol,legPos,iscatego
   else
     mi==ma && ((mi,ma)=getMinMax(a,m,symmetric=symmetric))
   end
-  colorm, colorm2, mi,ma,rgbar = _makeMaprgb(a,m,mi,ma,colorm,oceancol,misscol,legPos,iscategorical,symmetric,tickpos)
+  colorm, colorm2, mi,ma,rgbar = _makeMaprgb(a,m,mi,ma,colorm,oceancol,misscol,legPos,iscategorical,symmetric,tickspos)
   pngbuf=IOBuffer()
   show(pngbuf,"image/png",rgbar)
   legheight=legPos==:bottom ? max(0.1*Measures.h,1.6Measures.cm) : 0Measures.h
