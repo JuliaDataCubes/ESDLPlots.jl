@@ -65,8 +65,9 @@ plotCall(p::ScatterPlot) = quote
   #fmt=nPoints>20000 ? :png : :svg
   fmt=:svg
   if igroup > 0 && (igroup != ialongaxis)
+    plotf = isa(axlist[ivsaxis].values[c_1],CategoricalAxis) ? StatPlots.groupedbar : Plots.plot
     igroup < ialongaxis && (a_1=transpose(a_1);a_2=transpose(a_2))
-    p=Plots.scatter(a_1,a_2,
+    p=plotf(a_1,a_2,
       xlabel=string(axlist[ivsaxis].values[c_1]),
       ylabel=string(axlist[ivsaxis].values[c_2]),
       lab=reshape(string.(axlist[igroup].values),(1,length(axlist[igroup]))),
@@ -75,6 +76,7 @@ plotCall(p::ScatterPlot) = quote
       markerstrokewidth=msw
       )
   else
+    plotf = isa(axlist[ivsaxis].values[c_1],CategoricalAxis) ? Plots.bar : Plots.plot
     p=Plots.scatter(a_1,a_2,
       xlabel=string(axlist[ivsaxis].values[c_1]),
       ylabel=string(axlist[ivsaxis].values[c_2]),
@@ -109,3 +111,7 @@ function plotScatter{T}(cube::AbstractCubeData{T};group=nothing,vsaxis=VariableA
   return plotGeneric(ScatterPlot(vsaxis,alongaxis,group,xaxis,yaxis),cube;kwargs...)
 
 end
+
+export plotHist
+import ESDL.Proc.DATOnlineStats: HistogramCube, tohist
+plotHist(c::HistogramCube)=plotScatter(tohist(c),vsaxis="Hist",xaxis="MidPoints",yaxis="Frequency",alongaxis="Bin")
