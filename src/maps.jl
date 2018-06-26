@@ -116,10 +116,13 @@ Map plotting tool for cube objects, can be called on any type of cube data
 * `oceancol` color to fill the ocean with, defaults to `colorant"darkblue"`
 * `misscol` color to represent missing values, defaults to `colorant"gray"`
 * `symmetric` make the color scale symmetric around zero
-* `labels` given a list of labels this will create a plot with a non-continouous color scale where integer cube values [1..N] are mapped to the given labels.
+* `xaxis` which axis should be used for x axis, defaults to `LonAxis`
+* `yaxis` which axis should be used for y axis, defaults to `LatAxis`
 * `dim=value` can set other dimensions to certain values, for example `var="air_temperature_2m"` will fix the variable for the resulting plot
-
 If a dimension is neither longitude or latitude and is not fixed through an additional keyword, a slider or dropdown menu will appear to select the axis value.
+
+If the properties field of `cube` contains a "labels" field with a dictionary mapping field values to
+the name of the class represented.
 """
 function plotMAP{T}(cube::CubeAPI.AbstractCubeData{T};xaxis=LonAxis, yaxis=LatAxis, dmin=zero(T),dmax=zero(T),
   colorm=:inferno,oceancol=colorant"darkblue",misscol=colorant"gray",symmetric=false, tickspos=[],im_only=false,kwargs...)
