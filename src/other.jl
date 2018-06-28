@@ -11,9 +11,11 @@ plotCall(p::XYPlot) = quote
   if igroup > 0
     igroup < ixaxis && (a_1=transpose(a_1))
     plotf = isa(axlist[ixaxis],CategoricalAxis) ? StatPlots.groupedbar : Plots.plot
-    p=plotf(axlist[ixaxis].values,a_1,
-    lab=reshape(string.(axlist[igroup].values),(1,length(axlist[igroup]))),
-    xlabel=axname(axlist[ixaxis]))
+    labs = reshape(string.(axlist[igroup].values),(1,length(axlist[igroup])))
+    xlabel = axname(axlist[ixaxis])
+    p=plotf(axlist[ixaxis].values,a_1',
+    lab=labs,
+    xlabel=xlabel)
   else
     plotf = isa(axlist[ixaxis],CategoricalAxis) ? Plots.bar : Plots.plot
     p=plotf(axlist[ixaxis].values,a_1,xlabel=axname(axlist[ixaxis]))
