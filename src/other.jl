@@ -10,10 +10,15 @@ match_indend(::XYPlot)      = quote (d==ixaxis || d==igroup) => subcubedims[d]; 
 plotCall(p::XYPlot) = quote
   if igroup > 0
     igroup < ixaxis && (a_1=transpose(a_1))
-    plotf = isa(axlist[ixaxis],CategoricalAxis) ? StatPlots.groupedbar : Plots.plot
+    if isa(axlist[ixaxis],CategoricalAxis)
+      plotf = StatPlots.groupedbar
+      a_1 = a_1'
+    else
+      plotf = Plots.plot
+    end
     labs = reshape(string.(axlist[igroup].values),(1,length(axlist[igroup])))
     xlabel = axname(axlist[ixaxis])
-    p=plotf(axlist[ixaxis].values,a_1',
+    p=plotf(axlist[ixaxis].values,a_1,
     lab=labs,
     xlabel=xlabel)
   else
@@ -25,7 +30,7 @@ end
 nplotCubes(::XYPlot)=1
 
 """
-`plotXY(cube::AbstractCubeData; group=0, xaxis=-1, kwargs...)`
+    plotXY(cube::AbstractCubeData; group=0, xaxis=-1, kwargs...)
 
 Generic plotting tool for cube objects, can be called on any type of cube data.
 
@@ -93,7 +98,7 @@ end
 nplotCubes(::ScatterPlot)=2
 
 """
-`plotScatter(cube::AbstractCubeData; vsaxis=VariableAxis, alongaxis=0, group=0, xaxis=0, yaxis=0, kwargs...)`
+    plotScatter(cube::AbstractCubeData; vsaxis=VariableAxis, alongaxis=0, group=0, xaxis=0, yaxis=0, kwargs...)
 
 Generic plotting tool for cube objects to generate scatter plots, like variable `A` against variable `B`. Can be called on any type of cube data.
 

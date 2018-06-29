@@ -105,7 +105,7 @@ plotCall(p::MAPPlotContin)   = p.im_only ?
 :(_makeMap(a_1,m_1,mi,ma,colorm,oceancol,misscol,legPos,iscategorical,symmetric, tickspos))
 
 """
-`plotMAP(cube::AbstractCubeData; dmin=datamin, dmax=datamax, colorm=colormap("oranges"), oceancol=colorant"darkblue", misscol=colorant"gray", kwargs...)`
+    plotMAP(cube::AbstractCubeData; dmin=datamin, dmax=datamax, colorm=colormap("oranges"), oceancol=colorant"darkblue", misscol=colorant"gray", kwargs...)
 
 Map plotting tool for cube objects, can be called on any type of cube data
 
@@ -145,7 +145,7 @@ function plotMAP{T}(cube::CubeAPI.AbstractCubeData{T};xaxis=LonAxis, yaxis=LatAx
 end
 
 """
-`plotMAPRGB(cube::AbstractCubeData; dmin=datamin, dmax=datamax, colorm=colormap("oranges"), oceancol=colorant"darkblue", misscol=colorant"gray", kwargs...)`
+    plotMAPRGB(cube::AbstractCubeData; dmin=datamin, dmax=datamax, colorm=colormap("oranges"), oceancol=colorant"darkblue", misscol=colorant"gray", kwargs...)
 
 Map plotting tool for colored plots that use up to 3 variables as input into the several color channels.
 Several color representations from the `Colortypes.jl` package are supported, so that besides RGB (XYZ)-plots
