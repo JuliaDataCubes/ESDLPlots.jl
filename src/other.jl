@@ -20,10 +20,10 @@ plotCall(p::XYPlot) = quote
     xlabel = axname(axlist[ixaxis])
     p=plotf(axlist[ixaxis].values,a_1,
     lab=labs,
-    xlabel=xlabel)
+    xlabel=xlabel,fmt=:png)
   else
     plotf = isa(axlist[ixaxis],CategoricalAxis) ? Plots.bar : Plots.plot
-    p=plotf(axlist[ixaxis].values,a_1,xlabel=axname(axlist[ixaxis]))
+    p=plotf(axlist[ixaxis].values,a_1,xlabel=axname(axlist[ixaxis]),fmt=:png)
   end
   p
 end
@@ -70,7 +70,7 @@ plotCall(p::ScatterPlot) = quote
   pointSize = min(5000/nPoints,3)
   msw=pointSize > 2 ? 1 : 0
   #fmt=nPoints>20000 ? :png : :svg
-  fmt=:svg
+  fmt=:png
   if igroup > 0 && (igroup != ialongaxis)
     plotf = isa(axlist[ivsaxis].values[c_1],CategoricalAxis) ? StatPlots.groupedbar : Plots.plot
     igroup < ialongaxis && (a_1=transpose(a_1);a_2=transpose(a_2))
@@ -80,17 +80,16 @@ plotCall(p::ScatterPlot) = quote
       lab=reshape(string.(axlist[igroup].values),(1,length(axlist[igroup]))),
       fmt=fmt,
       ms=pointSize,
-      markerstrokewidth=msw
+      markerstrokewidth=msw,
       )
   else
-    plotf = isa(axlist[ivsaxis].values[c_1],CategoricalAxis) ? Plots.bar : Plots.plot
     p=Plots.scatter(a_1,a_2,
       xlabel=string(axlist[ivsaxis].values[c_1]),
       ylabel=string(axlist[ivsaxis].values[c_2]),
       lab="",
       fmt=fmt,
       ms=pointSize,
-      markerstrokewidth=msw
+      markerstrokewidth=msw,
       )
   end
   p
