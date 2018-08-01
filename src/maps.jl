@@ -298,6 +298,7 @@ end
 
 function _makeMaprgb{T}(a::Array{T},m,mi,ma,colorm,oceancol,misscol,legPos,iscategorical,symmetric,tickspos)
   if iscategorical
+    @assert isa(colorm, Tuple)
     colorm,colorm2=colorm
   else
     mi==ma && ((mi,ma)=getMinMax(a,m,symmetric=symmetric))
@@ -306,9 +307,7 @@ function _makeMaprgb{T}(a::Array{T},m,mi,ma,colorm,oceancol,misscol,legPos,iscat
   colorm, colorm2, mi,ma,getRGBAR(a,m,colorm,convert(T,mi),convert(T,ma),misscol,oceancol)
 end
 function _makeMap{T}(a::Array{T},m,mi,ma,colorm,oceancol,misscol,legPos,iscategorical,symmetric,tickspos)
-  if iscategorical
-    colorm,colorm2=colorm
-  else
+  if !iscategorical
     mi==ma && ((mi,ma)=getMinMax(a,m,symmetric=symmetric))
   end
   colorm, colorm2, mi,ma,rgbar = _makeMaprgb(a,m,mi,ma,colorm,oceancol,misscol,legPos,iscategorical,symmetric,tickspos)
