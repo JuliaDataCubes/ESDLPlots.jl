@@ -8,6 +8,7 @@ match_subCubeDims(::XYPlot) = quote (d==ixaxis || d==igroup) => length(axlist[d]
 match_indstart(::XYPlot)    = quote (d==ixaxis || d==igroup) => 1; defa=> axVal2Index(axlist[d],v_d,fuzzy=true) end
 match_indend(::XYPlot)      = quote (d==ixaxis || d==igroup) => subcubedims[d]; defa=> axVal2Index(axlist[d],v_d,fuzzy=true) end
 plotCall(p::XYPlot) = quote
+  a_1 = map((m,v)->iszero(m & 0x01) ? v : oftype(v,NaN),m_1,a_1)
   if igroup > 0
     igroup < ixaxis && (a_1=transpose(a_1))
     if isa(axlist[ixaxis],CategoricalAxis)
@@ -66,6 +67,12 @@ match_subCubeDims(::ScatterPlot) = quote (d==ialongaxis || d==igroup) => length(
 match_indstart(::ScatterPlot)    = quote (d==ialongaxis || d==igroup) => 1; d==ivsaxis => axVal2Index(axlist[d],c_f,fuzzy=true); defa=> axVal2Index(axlist[d],v_d,fuzzy=true) end
 match_indend(::ScatterPlot)      = quote (d==ialongaxis || d==igroup) => subcubedims[d]; d==ivsaxis => axVal2Index(axlist[d],c_f,fuzzy=true); defa=> axVal2Index(axlist[d],v_d,fuzzy=true) end
 plotCall(p::ScatterPlot) = quote
+  goodinds = map((m1,m2)->iszero((m1 | m2) & 0x01),m_1,m_2)
+  a_1 = a_1[goodinds]
+  a_2 = a_2[goodinds]
+  if isempty(a_1)
+    push!(a_1,1);push!(a_2,1)
+  end
   nPoints = length(a_1)
   pointSize = min(5000/nPoints,3)
   msw=pointSize > 2 ? 1 : 0
