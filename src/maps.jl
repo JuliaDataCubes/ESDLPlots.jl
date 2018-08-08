@@ -1,6 +1,6 @@
 abstract type MAPPlot <: ESDLPlot end
 
-type MAPPlotRGB <: MAPPlot
+mutable struct MAPPlotRGB <: MAPPlot
   xaxis
   yaxis
   rgbAxis
@@ -53,7 +53,7 @@ min_indim(::MAPPlot)=2
 n_fixedindim(::MAPPlot)=0
 
 
-type MAPPlotCategory <: MAPPlotMapped
+mutable struct MAPPlotCategory <: MAPPlotMapped
   colorm
   colorm2
   oceancol
@@ -76,7 +76,7 @@ plotCall(p::MAPPlotCategory) = p.im_only ?
   :(_makeMap(a_1,m_1,0.0,0.0,colorm,oceancol,misscol,legPos,iscategorical,false,[]))
 
 
-type MAPPlotContin <: MAPPlotMapped
+mutable struct MAPPlotContin <: MAPPlotMapped
   colorm
   dmin
   dmax
@@ -124,8 +124,8 @@ If a dimension is neither longitude or latitude and is not fixed through an addi
 If the properties field of `cube` contains a "labels" field with a dictionary mapping field values to
 the name of the class represented.
 """
-function plotMAP{T}(cube::CubeAPI.AbstractCubeData{T};xaxis=LonAxis, yaxis=LatAxis, dmin=zero(T),dmax=zero(T),
-  colorm=:inferno,oceancol=colorant"darkblue",misscol=colorant"gray",symmetric=false, tickspos=[],im_only=false,kwargs...)
+function plotMAP(cube::CubeAPI.AbstractCubeData{T};xaxis=LonAxis, yaxis=LatAxis, dmin=zero(T),dmax=zero(T),
+  colorm=:inferno,oceancol=colorant"darkblue",misscol=colorant"gray",symmetric=false, tickspos=[],im_only=false,kwargs...) where T
 
   isa(colorm,Symbol) && (colorm=get(namedcolms,colorm,namedcolms[:inferno]))
   dmin,dmax=typed_dminmax(T,dmin,dmax)
@@ -165,9 +165,9 @@ one can create HSL, HSI, HSV or Lab and Luv plots.
 
 If a dimension is neither longitude or latitude and is not fixed through an additional keyword, a slider or dropdown menu will appear to select the axis value.
 """
-function plotMAPRGB{T}(cube::CubeAPI.AbstractCubeData{T};dmin=zero(T),dmax=zero(T),
+function plotMAPRGB(cube::CubeAPI.AbstractCubeData{T};dmin=zero(T),dmax=zero(T),
   rgbAxis=VariableAxis,oceancol=colorant"darkblue",misscol=colorant"gray",symmetric=false,
-  c1 = nothing, c2=nothing, c3=nothing, cType=XYZ, xaxis=LonAxis,yaxis=LatAxis,kwargs...)
+  c1 = nothing, c2=nothing, c3=nothing, cType=XYZ, xaxis=LonAxis,yaxis=LatAxis,kwargs...) where T
 
   isa(rgbAxis,CubeAxis) && (rgbAxis=typeof(rgbAxis))
 
@@ -297,7 +297,7 @@ function val2col(x,m,colorm::Dict,misscol,oceancol)
   end
 end
 
-function _makeMaprgb{T}(a::Array{T},m,mi,ma,colorm,oceancol,misscol,legPos,iscategorical,symmetric,tickspos)
+function _makeMaprgb(a::Array{T},m,mi,ma,colorm,oceancol,misscol,legPos,iscategorical,symmetric,tickspos) where T
   if iscategorical
     @assert isa(colorm, Tuple)
     colorm,colorm2=colorm
@@ -307,7 +307,7 @@ function _makeMaprgb{T}(a::Array{T},m,mi,ma,colorm,oceancol,misscol,legPos,iscat
   end
   colorm, colorm2, mi,ma,getRGBAR(a,m,colorm,convert(T,mi),convert(T,ma),misscol,oceancol)
 end
-function _makeMap{T}(a::Array{T},m,mi,ma,colorm,oceancol,misscol,legPos,iscategorical,symmetric,tickspos)
+function _makeMap(a::Array{T},m,mi,ma,colorm,oceancol,misscol,legPos,iscategorical,symmetric,tickspos) where T
   if !iscategorical
     mi==ma && ((mi,ma)=getMinMax(a,m,symmetric=symmetric))
   end

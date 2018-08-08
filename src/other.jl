@@ -1,4 +1,4 @@
-type XYPlot <: ESDLPlot
+mutable struct XYPlot <: ESDLPlot
   xaxis
   group
 
@@ -43,13 +43,13 @@ Generic plotting tool for cube objects, can be called on any type of cube data.
 
 If a dimension is not the x axis or group variable and is not fixed through an additional keyword, a slider or dropdown menu will appear to select the axis value.
 """
-function plotXY{T}(cube::AbstractCubeData{T};group=nothing,xaxis=nothing,kwargs...)
+function plotXY(cube::AbstractCubeData{T};group=nothing,xaxis=nothing,kwargs...) where T
 
   return plotGeneric(XYPlot(xaxis,group),cube;kwargs...)
 
 end
 
-type ScatterPlot <: ESDLPlot
+mutable struct ScatterPlot <: ESDLPlot
   vsaxis
   alongaxis
   group
@@ -119,7 +119,7 @@ Generic plotting tool for cube objects to generate scatter plots, like variable 
 
 If a dimension is not the `vsaxis` or `alongaxis` or `group` and is not fixed through an additional keyword, a slider or dropdown menu will appear to select the axis value.
 """
-function plotScatter{T}(cube::AbstractCubeData{T};group=nothing,vsaxis=VariableAxis,xaxis=nothing,yaxis=nothing,alongaxis=nothing,kwargs...)
+function plotScatter(cube::AbstractCubeData{T};group=nothing,vsaxis=VariableAxis,xaxis=nothing,yaxis=nothing,alongaxis=nothing,kwargs...) where T
 
   return plotGeneric(ScatterPlot(vsaxis,alongaxis,group,xaxis,yaxis),cube;kwargs...)
 
