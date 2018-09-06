@@ -33,7 +33,7 @@ getafterEx(::ESDLPlot)=Expr(:block)
 "Setting fixed variables"
 getFixedVars(::ESDLPlot,cube)=Expr(:block)
 
-type FixedAx
+mutable struct FixedAx
   axis
   axsym::Symbol
   widgetlabel::String
@@ -42,7 +42,7 @@ type FixedAx
   position::Int
 end
 
-type FixedVar
+mutable struct FixedVar
   depAxis
   varVal
   varsym::Symbol
@@ -74,7 +74,7 @@ function count_to(f,c,i)
 end
 
 getWidget(x::CategoricalAxis;label=axname(x))       = dropdown(Dict(zip(x.values,1:length(x.values))),label=label)
-getWidget{T<:Real}(x::RangeAxis{T};label=axname(x)) = step(x.values) > 0 ? slider(x.values,label=label) : slider(reverse(x.values),label=label)
+getWidget(x::RangeAxis{T};label=axname(x)) where {T<:Real} = step(x.values) > 0 ? slider(x.values,label=label) : slider(reverse(x.values),label=label)
 getWidget(x::RangeAxis;label=axname(x))             = selection_slider(x.values,label=label)
 getWidget(x::SpatialPointAxis;label="Spatial Point")= slider(1:length(x),label=label)
 
@@ -142,15 +142,15 @@ const namedcolms=Dict(
 :magma=>[cgrad(:magma)[ix] for ix in linspace(0,1,100)],
 :inferno=>[cgrad(:inferno)[ix] for ix in linspace(0,1,100)],
 :plasma=>[cgrad(:plasma)[ix] for ix in linspace(0,1,100)])
-typed_dminmax{T<:Integer}(::Type{T},dmin,dmax)=(Int(dmin),Int(dmax))
-typed_dminmax{T<:AbstractFloat}(::Type{T},dmin,dmax)=(Float64(dmin),Float64(dmax))
-typed_dminmax2{T<:Integer}(::Type{T},dmin,dmax)=(isa(dmin,Tuple) ? (Int(dmin[1]),Int(dmin[2]),Int(dmin[3])) : (Int(dmin),Int(dmin),Int(dmin)), isa(dmax,Tuple) ? (Int(dmax[1]),Int(dmax[2]),Int(dmax[3])) : (Int(dmax),Int(dmax),Int(dmax)))
-typed_dminmax2{T<:AbstractFloat}(::Type{T},dmin,dmax)=(isa(dmin,Tuple) ? (Float64(dmin[1]),Float64(dmin[2]),Float64(dmin[3])) : (Float64(dmin),Float64(dmin),Float64(dmin)), isa(dmax,Tuple) ? (Float64(dmax[1]),Float64(dmax[2]),Float64(dmax[3])) : (Float64(dmax),Float64(dmax),Float64(dmax)))
+typed_dminmax(::Type{T},dmin,dmax) where {T<:Integer}=(Int(dmin),Int(dmax))
+typed_dminmax(::Type{T},dmin,dmax) where {T<:AbstractFloat}=(Float64(dmin),Float64(dmax))
+typed_dminmax2(::Type{T},dmin,dmax) where {T<:Integer}=(isa(dmin,Tuple) ? (Int(dmin[1]),Int(dmin[2]),Int(dmin[3])) : (Int(dmin),Int(dmin),Int(dmin)), isa(dmax,Tuple) ? (Int(dmax[1]),Int(dmax[2]),Int(dmax[3])) : (Int(dmax),Int(dmax),Int(dmax)))
+typed_dminmax2(::Type{T},dmin,dmax) where {T<:AbstractFloat}=(isa(dmin,Tuple) ? (Float64(dmin[1]),Float64(dmin[2]),Float64(dmin[3])) : (Float64(dmin),Float64(dmin),Float64(dmin)), isa(dmax,Tuple) ? (Float64(dmax[1]),Float64(dmax[2]),Float64(dmax[3])) : (Float64(dmax),Float64(dmax),Float64(dmax)))
 
 
 
 
-function plotGeneric{T}(plotObj::ESDLPlot, cube::CubeAPI.AbstractCubeData{T};kwargs...)
+function plotGeneric(plotObj::ESDLPlot, cube::CubeAPI.AbstractCubeData{T};kwargs...) where T
 
 
   axlist=axes(cube)
