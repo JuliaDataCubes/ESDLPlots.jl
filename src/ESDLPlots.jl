@@ -8,7 +8,7 @@ import ESDL.DAT
 import ESDL.DAT: findAxis,getFrontPerm
 import ESDL.Cubes.Axes.axname
 import Reactive: Signal
-import Interact: slider, dropdown, togglebutton, togglebuttons, Observable, observe
+import Interact: slider, dropdown, Observable, observe
 import Colors: RGB, @colorant_str, colormap,  distinguishable_colors
 import FixedPointNumbers: Normed
 import Base.Cartesian: @ntuple,@nexprs
@@ -16,12 +16,14 @@ import Measures
 import Compose
 import Images
 import DataStructures: OrderedDict
-import Plots
-import Plots: plotlyjs, gr, pyplot
 import StatPlots
 import PlotUtils: optimize_ticks, cgrad
 import Compose: rectangle, text, line, compose, context, stroke, svgattribute, bitmap, HCenter, VBottom, HRight, VCenter
 
+function __init()__
+  eval(:(import Plots))
+  eval(:(import Plots: plotlyjs, gr, pyplot))
+end
 
 const U8=Normed{UInt8,8}
 
@@ -100,7 +102,7 @@ function setPlotAxis(a::FixedVar,axlist,fixedAxes,customobs,positionobs)
   end
 end
 
-import Interact: observe
+import Interact: observe, Widget
 
 function createWidgets(axlist,availableAxis,availableIndices,axlabels,widgets,axtuples,customobs,positionobs)
 
@@ -110,19 +112,19 @@ function createWidgets(axlist,availableAxis,availableIndices,axlabels,widgets,ax
         options = collect(at.musthave ? zip(axlabels[availableIndices],availableIndices) : zip(["None";axlabels[availableIndices]],[0;availableIndices]))
         axmenu  = dropdown(OrderedDict(options),label=at.widgetlabel,value=options[1][2],value_label=options[1][1])
         sax = observe(axmenu)
-        push!(widgets,axmenu)
+        widgets[Symbol(at.widgetlabel)]=axmenu
         customobs[icust] = sax
       elseif isa(at,FixedVar)
         w=getWidget(axlist[at.depAxis],label=at.widgetlabel)
-        push!(widgets,w)
+        widgets[Symbol(at.widgetlabel)]=w
         customobs[icust] = observe(w)
       else
-        println("Skipping selected")
+        #println("Skipping selected")
       end
     end
     for i in availableIndices
       w=getWidget(axlist[i])
-      push!(widgets,w)
+      widgets[Symbol(axname(axlist[i]))]=w
       positionobs[i] = observe(w)
     end
   else
@@ -148,20 +150,23 @@ mygetval(i)=i
 mygetval(i::Observable)=i[]
 
 
+import Interact
+import InteractBase
+import Observables
 function plotGeneric(plotObj::ESDLPlot, cube::CubeAPI.AbstractCubeData{T};kwargs...) where T
 
 
   axlist=caxes(cube)
 
   axlabels=map(axname,axlist)
-  widgets=Any[]
   fixedAxes=CubeAxis[]
   customobs=[]
+  widgets=OrderedDict{Symbol,Any}()
   positionobs=Array{Any}(undef,ndims(cube))
 
-  pAxVars=ESDLPlots.plotAxVars(plotObj)
+  pAxVars=plotAxVars(plotObj)
 
-  foreach(t->ESDLPlots.setPlotAxis(t,axlist,fixedAxes,customobs,positionobs),pAxVars)
+  foreach(t->setPlotAxis(t,axlist,fixedAxes,customobs,positionobs),pAxVars)
 
   for (sy,val) in kwargs
       ix = findAxis(string(sy),axlist)
@@ -174,16 +179,17 @@ function plotGeneric(plotObj::ESDLPlot, cube::CubeAPI.AbstractCubeData{T};kwargs
   availableIndices=findall(ax->!in(ax,fixedAxes),axlist)
   availableAxis=axlist[availableIndices]
 
-  ESDLPlots.createWidgets(axlist,availableAxis,availableIndices,axlabels,widgets,pAxVars,customobs,positionobs)
+  createWidgets(axlist,availableAxis,availableIndices,axlabels,widgets,pAxVars,customobs,positionobs)
 
   ofirst = plotCall(plotObj,cube,map(mygetval,customobs)...,map(mygetval,positionobs)...);
   s=Observable(ofirst)
 
   map!((i...)->plotCall(plotObj,cube,i...),s,customobs...,positionobs...);
 
-  map(display,widgets)
-  display(s)
-  nothing
+  #map(display,widgets)
+  #display(s)
+  layout = t -> InteractBase.node(:div, map(InteractBase.center, InteractBase.values(InteractBase.components(t)))..., map(InteractBase.center, s))
+  Widget{:ESDLPlot}(widgets,output=Observables.throttle(1.0,s),layout = layout)
 end
 
 end # module
