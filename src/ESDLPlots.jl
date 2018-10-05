@@ -1,3 +1,4 @@
+__precompile__(false)
 module ESDLPlots
 export plotTS, plotMAP, plotXY, plotScatter, plotMAPRGB
 export plotlyjs, gadfly, gr, pyplot
@@ -16,14 +17,12 @@ import Measures
 import Compose
 import Images
 import DataStructures: OrderedDict
-import StatPlots
 import PlotUtils: optimize_ticks, cgrad
 import Compose: rectangle, text, line, compose, context, stroke, svgattribute, bitmap, HCenter, VBottom, HRight, VCenter
 
-function __init()__
-  eval(:(import Plots))
-  eval(:(import Plots: plotlyjs, gr, pyplot))
-end
+import Plots
+import Plots: plotlyjs, gr, pyplot, plot, bar, scatter
+import StatPlots: groupedbar
 
 const U8=Normed{UInt8,8}
 
@@ -137,10 +136,10 @@ function createWidgets(axlist,availableAxis,availableIndices,axlabels,widgets,ax
 end
 
 const namedcolms=Dict(
-:viridis=>[cgrad(:viridis)[ix] for ix in linspace(0,1,100)],
-:magma=>[cgrad(:magma)[ix] for ix in linspace(0,1,100)],
-:inferno=>[cgrad(:inferno)[ix] for ix in linspace(0,1,100)],
-:plasma=>[cgrad(:plasma)[ix] for ix in linspace(0,1,100)])
+:viridis=>[cgrad(:viridis)[ix] for ix in range(0,stop=1,length=100)],
+:magma=>[cgrad(:magma)[ix] for ix in range(0,stop=1,length=100)],
+:inferno=>[cgrad(:inferno)[ix] for ix in range(0,stop=1,length=100)],
+:plasma=>[cgrad(:plasma)[ix] for ix in range(0,stop=1,length=100)])
 typed_dminmax(::Type{T},dmin,dmax) where {T<:Integer}=(Int(dmin),Int(dmax))
 typed_dminmax(::Type{T},dmin,dmax) where {T<:AbstractFloat}=(Float64(dmin),Float64(dmax))
 typed_dminmax2(::Type{T},dmin,dmax) where {T<:Integer}=(isa(dmin,Tuple) ? (Int(dmin[1]),Int(dmin[2]),Int(dmin[3])) : (Int(dmin),Int(dmin),Int(dmin)), isa(dmax,Tuple) ? (Int(dmax[1]),Int(dmax[2]),Int(dmax[3])) : (Int(dmax),Int(dmax),Int(dmax)))
@@ -180,7 +179,6 @@ function plotGeneric(plotObj::ESDLPlot, cube::CubeAPI.AbstractCubeData{T};kwargs
   availableAxis=axlist[availableIndices]
 
   createWidgets(axlist,availableAxis,availableIndices,axlabels,widgets,pAxVars,customobs,positionobs)
-
   ofirst = plotCall(plotObj,cube,map(mygetval,customobs)...,map(mygetval,positionobs)...);
   s=Observable(ofirst)
 

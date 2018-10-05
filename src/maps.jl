@@ -99,7 +99,7 @@ function plotCall(p::MAPPlotContin, d::AbstractCubeData, ixaxis, iyaxis, otherin
 
   axlist = caxes(d)
   inds = ntuple(i->in(i,(ixaxis,iyaxis)) ? (:) : axVal2Index(axlist[i],otherinds[i]), length(otherinds))
-
+  
   a = d[inds...]
 
   if p.dmin==p.dmax

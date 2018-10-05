@@ -10,13 +10,15 @@ function plotCall(::XYPlot,d::AbstractCubeData,ixaxis,igroup,otherinds...)
   inds1 = ntuple(  i->in(i,(ixaxis,igroup)) ? (:) : axVal2Index(axlist[i],otherinds[i]), length(otherinds))
   x1 = d[inds1...]
 
+  replace!(x1,missing=>NaN)
+
   if igroup > 0
     igroup < ixaxis && (x1=transpose(x1))
     if isa(axlist[ixaxis],CategoricalAxis)
-      plotf = StatPlots.groupedbar
+      plotf = groupedbar
       x1 = x1'
     else
-      plotf = Plots.plot
+      plotf = plot
     end
     labs = reshape(string.(axlist[igroup].values),(1,length(axlist[igroup])))
     xlabel = axname(axlist[ixaxis])
@@ -24,7 +26,7 @@ function plotCall(::XYPlot,d::AbstractCubeData,ixaxis,igroup,otherinds...)
     lab=labs,
     xlabel=xlabel)
   else
-    plotf = isa(axlist[ixaxis],CategoricalAxis) ? Plots.bar : Plots.plot
+    plotf = isa(axlist[ixaxis],CategoricalAxis) ? bar : plot
     p=plotf(axlist[ixaxis].values,x1,xlabel=axname(axlist[ixaxis]),fmt=:png)
   end
   p
@@ -73,6 +75,9 @@ function plotCall(::ScatterPlot,d::AbstractCubeData,ivsaxis,ialongaxis,igroup,c1
   x1 = d[inds1...]
   x2 = d[inds2...]
 
+  replace!(x1,missing=>NaN)
+  replace!(x2,missing=>NaN)
+
   goodinds = map((m1,m2)->!ismissing(m1) && !ismissing(m2),x1,x2)
   a_1 = x1[goodinds]
   a_2 = x2[goodinds]
@@ -84,7 +89,7 @@ function plotCall(::ScatterPlot,d::AbstractCubeData,ivsaxis,ialongaxis,igroup,c1
   msw=pointSize > 2 ? 1 : 0
   fmt=nPoints>20000 ? :png : :svg
   if igroup > 0 && (igroup != ialongaxis)
-    plotf = isa(axlist[ivsaxis],CategoricalAxis) ? StatPlots.groupedbar : Plots.plot
+    plotf = isa(axlist[ivsaxis],CategoricalAxis) ? groupedbar : plot
     igroup < ialongaxis && (a_1=transpose(a_1);a_2=transpose(a_2))
     p=plotf(a_1,a_2,
       xlabel=string(axlist[ivsaxis].values[inds1[ivsaxis]]),
@@ -95,7 +100,7 @@ function plotCall(::ScatterPlot,d::AbstractCubeData,ivsaxis,ialongaxis,igroup,c1
       markerstrokewidth=msw,
       )
   else
-    p=Plots.scatter(a_1,a_2,
+    p = scatter(a_1,a_2,
       xlabel=string(axlist[ivsaxis].values[inds1[ivsaxis]]),
       ylabel=string(axlist[ivsaxis].values[inds2[ivsaxis]]),
       lab="",
