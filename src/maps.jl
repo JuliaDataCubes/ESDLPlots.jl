@@ -99,7 +99,7 @@ function plotCall(p::MAPPlotContin, d::AbstractCubeData, ixaxis, iyaxis, otherin
 
   axlist = caxes(d)
   inds = ntuple(i->in(i,(ixaxis,iyaxis)) ? (:) : axVal2Index(axlist[i],otherinds[i]), length(otherinds))
-  
+
   a = d[inds...]
 
   if p.dmin==p.dmax
@@ -108,7 +108,6 @@ function plotCall(p::MAPPlotContin, d::AbstractCubeData, ixaxis, iyaxis, otherin
     mi=p.dmin
     ma=p.dmax
   end
-
 
   if p.im_only
     _makeMaprgb(toMatrix(a.data),toMatrix(a.mask),mi,ma,p.colorm,p.oceancol,p.misscol,:bottom,false,p.symmetric,p.tickspos)[5]
