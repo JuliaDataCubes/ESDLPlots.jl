@@ -75,9 +75,9 @@ function plotCall(p::MAPPlotCategory,d::AbstractCubeData, ixaxis, iyaxis,otherin
 
 
   if p.im_only
-    _makeMaprgb(toMatrix(a.data),toMatrix(a.mask),0.0,0.0,(p.colorm,p.colorm2),p.oceancol,p.misscol,:right,true,false,[])[5]
+    _makeMaprgb(a,0.0,0.0,(p.colorm,p.colorm2),p.oceancol,p.misscol,:right,true,false,[])[5]
   else
-    _makeMap(toMatrix(a.data),toMatrix(a.mask),0.0,0.0,(p.colorm,p.colorm2),p.oceancol,p.misscol,:right,true,false,[])
+    _makeMap(a,0.0,0.0,(p.colorm,p.colorm2),p.oceancol,p.misscol,:right,true,false,[])
   end
 end
 
@@ -110,9 +110,9 @@ function plotCall(p::MAPPlotContin, d::AbstractCubeData, ixaxis, iyaxis, otherin
   end
 
   if p.im_only
-    _makeMaprgb(toMatrix(a.data),toMatrix(a.mask),mi,ma,p.colorm,p.oceancol,p.misscol,:bottom,false,p.symmetric,p.tickspos)[5]
+    _makeMaprgb(a,mi,ma,p.colorm,p.oceancol,p.misscol,:bottom,false,p.symmetric,p.tickspos)[5]
   else
-    _makeMap(toMatrix(a.data),toMatrix(a.mask),mi,ma,p.colorm,p.oceancol,p.misscol,:bottom,false,p.symmetric,p.tickspos)
+    _makeMap(a,mi,ma,p.colorm,p.oceancol,p.misscol,:bottom,false,p.symmetric,p.tickspos)
   end
 end
 
@@ -194,9 +194,9 @@ function plotMAPRGB(cube::CubeAPI.AbstractCubeData{T};dmin=zero(T),dmax=zero(T),
   return plotGeneric(MAPPlotRGB(xaxis,yaxis,rgbaxis,dmin,dmax,c1,c2,c3,misscol,oceancol,cType),cube;kwargs...)
 end
 
-@noinline getRGBAR(a,m,colorm,mi,ma,misscol,oceancol)=RGB{U8}[val2col(a[i,j],m[i,j],colorm,mi,ma,misscol,oceancol) for j=1:size(a,2),i=1:size(a,1)]
-@noinline getRGBAR(cType,ar,ag,ab,mi,ma,misscol,oceancol)=map((ar,mr,ag,mg,ab,mb)->RGB(val2col(cType,ar,mr,ag,mg,ab,mb,mi,ma,misscol,oceancol)),ar.data,ar.mask,ag.data,ag.mask,ab.data,ab.mask)
-@noinline getRGBAR(a,m,colorm::Dict,mi,ma,misscol,oceancol)=RGB{U8}[val2col(a[i,j],m[i,j],colorm,misscol,oceancol) for j=1:size(a,2),i=1:size(a,1)]
+@noinline getRGBAR(a,colorm,mi,ma,misscol,oceancol)=RGB{U8}[val2col(a[i,j],colorm,mi,ma,misscol,oceancol) for j=1:size(a,2),i=1:size(a,1)]
+@noinline getRGBAR(cType,ar,ag,ab,mi,ma,misscol,oceancol)=map((ar,ag,ab)->RGB(val2col(cType,ar,ag,ab,mi,ma,misscol,oceancol)),ar,ag,ab)
+@noinline getRGBAR(a,colorm::Dict,mi,ma,misscol,oceancol)=RGB{U8}[val2col(a[i,j],colorm,misscol,oceancol) for j=1:size(a,2),i=1:size(a,1)]
 
 using ColorTypes
 channel_max(d::DataType)="Colortype $d not yet added"
@@ -274,56 +274,56 @@ function getMinMax(x::AbstractArray{<:Union{T,Missing}};symmetric=false) where T
   mi,ma
 end
 
-function val2col(x,m,colorm,mi,ma,misscol,oceancol)
+function val2col(x,colorm,mi,ma,misscol,oceancol)
   N=length(colorm)
   #println(x)
-  if !isnan(x) && x<typemax(x) && iszero(m & 0x01)
+  if !ismissing(x) && x<typemax(x)
     i=ceil(Int,min(N,max(1.0,(x-mi)/(ma-mi)*N)))
     return colorm[i]
-  elseif (m & OCEAN)==OCEAN
-    return oceancol
+  #elseif (m & OCEAN)==OCEAN
+  #  return oceancol
   else
     return misscol
   end
 end
 
-function val2col(cType,xr,mr,xg,mg,xb,mb,mi,ma,misscol,oceancol)
+function val2col(cType,xr,xg,xb,mi,ma,misscol,oceancol)
   mi1,mi2,mi3=channel_min(cType)
   ma1,ma2,ma3=channel_max(cType)
-  if !isnan(xr) && !isnan(xg) && !isnan(xb) && iszero((mr | mg | mb) & MISSING)
+  if !any(ismissing,(xr,xg,xb))
     return cType((xr-mi[1])/(ma[1]-mi[1])*(ma1-mi1)+mi1,(xg-mi[2])/(ma[2]-mi[2])*(ma2-mi2)+mi2,(xb-mi[3])/(ma[3]-mi[3])*(ma3-mi3)+mi3)
-  elseif (mr & OCEAN)==OCEAN
-    return oceancol
+  #elseif (mr & OCEAN)==OCEAN
+  #  return oceancol
   else
     return misscol
   end
 end
 
-function val2col(x,m,colorm::Dict,misscol,oceancol)
-  if !isnan(x) && m==VALID || m==FILLED
+function val2col(x,colorm::Dict,misscol,oceancol)
+  if !isnan(x)
     return get(colorm,x,misscol)
-  elseif (m & OCEAN)==OCEAN
-    return oceancol
+  #elseif (m & OCEAN)==OCEAN
+  #  return oceancol
   else
     return misscol
   end
 end
 
-function _makeMaprgb(a::Array{T},m,mi,ma,colorm,oceancol,misscol,legPos,iscategorical,symmetric,tickspos) where T
+function _makeMaprgb(a::Array{T},mi,ma,colorm,oceancol,misscol,legPos,iscategorical,symmetric,tickspos) where T
   if iscategorical
     @assert isa(colorm, Tuple)
     colorm,colorm2=colorm
   else
-    mi==ma && ((mi,ma)=getMinMax(a,m,symmetric=symmetric))
+    mi==ma && ((mi,ma)=getMinMax(a,symmetric=symmetric))
     colorm2=nothing
   end
-  colorm, colorm2, mi,ma,getRGBAR(a,m,colorm,convert(T,mi),convert(T,ma),misscol,oceancol)
+  colorm, colorm2, mi,ma,getRGBAR(a,colorm,convert(T,mi),convert(T,ma),misscol,oceancol)
 end
-function _makeMap(a::Array{T},m,mi,ma,colorm,oceancol,misscol,legPos,iscategorical,symmetric,tickspos) where T
+function _makeMap(a::Array{T},mi,ma,colorm,oceancol,misscol,legPos,iscategorical,symmetric,tickspos) where T
   if !iscategorical
-    mi==ma && ((mi,ma)=getMinMax(a,m,symmetric=symmetric))
+    mi==ma && ((mi,ma)=getMinMax(a,symmetric=symmetric))
   end
-  colorm, colorm2, mi,ma,rgbar = _makeMaprgb(a,m,mi,ma,colorm,oceancol,misscol,legPos,iscategorical,symmetric,tickspos)
+  colorm, colorm2, mi,ma,rgbar = _makeMaprgb(a,mi,ma,colorm,oceancol,misscol,legPos,iscategorical,symmetric,tickspos)
   pngbuf=IOBuffer()
   show(pngbuf,"image/png",rgbar)
   legheight=legPos==:bottom ? max(0.1*Measures.h,1.6Measures.cm) : 0Measures.h
