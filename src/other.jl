@@ -10,6 +10,7 @@ function plotCall(::XYPlot,d::AbstractCubeData,ixaxis,igroup,otherinds...)
   inds1 = ntuple(  i->in(i,(ixaxis,igroup)) ? (:) : axVal2Index(axlist[i],otherinds[i]), length(otherinds))
   x1 = d[inds1...]
 
+  all(ismissing(x1)) && (x1=fill(NaN,length(x1)))
   replace!(x1,missing=>NaN)
 
   if igroup > 0
@@ -76,6 +77,8 @@ function plotCall(::ScatterPlot,d::AbstractCubeData,ivsaxis,ialongaxis,igroup,c1
   x1 = d[inds1...]
   x2 = d[inds2...]
 
+  all(ismissing(x1)) && (x1=fill(NaN,length(x1)))
+  all(ismissing(x2)) && (x2=fill(NaN,length(x2)))
   replace!(x1,missing=>NaN)
   replace!(x2,missing=>NaN)
 
