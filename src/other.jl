@@ -137,6 +137,6 @@ function plotScatter(cube::AbstractCubeData{T};group=nothing,vsaxis=VariableAxis
 
 end
 
-export plotHist
-import ESDL.Proc.DATOnlineStats: HistogramCube, tohist
-plotHist(c::HistogramCube)=plotScatter(tohist(c),vsaxis="Hist",xaxis="MidPoints",yaxis="Frequency",alongaxis="Bin")
+#export plotHist
+#import ESDL.Proc.DATOnlineStats: HistogramCube, tohist
+#plotHist(c::HistogramCube)=plotScatter(tohist(c),vsaxis="Hist",xaxis="MidPoints",yaxis="Frequency",alongaxis="Bin")
