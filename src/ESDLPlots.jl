@@ -1,5 +1,6 @@
 __precompile__(false)
 module ESDLPlots
+using ImageMagick
 export plotTS, plotMAP, plotXY, plotScatter, plotMAPRGB
 export plotlyjs, gadfly, gr, pyplot
 using ESDL.Cubes
