@@ -5,7 +5,6 @@ export plotTS, plotMAP, plotXY, plotScatter, plotMAPRGB
 export plotlyjs, gadfly, gr, pyplot
 using ESDL.Cubes
 using ESDL.CubeAPI
-using ESDL.CubeAPI.Mask
 import ESDL.DAT
 import ESDL.DAT: findAxis,getFrontPerm
 import ESDL.Cubes.Axes.axname
@@ -141,6 +140,8 @@ const namedcolms=Dict(
 :magma=>[cgrad(:magma)[ix] for ix in range(0,stop=1,length=100)],
 :inferno=>[cgrad(:inferno)[ix] for ix in range(0,stop=1,length=100)],
 :plasma=>[cgrad(:plasma)[ix] for ix in range(0,stop=1,length=100)])
+typed_dminmax(::Type{<:Union{T,Missing}},dmin,dmax) where T = typed_dminmax(T,dmin,dmax)
+typed_dminmax2(::Type{<:Union{T,Missing}},dmin,dmax) where T = typed_dminmax2(T,dmin,dmax)
 typed_dminmax(::Type{T},dmin,dmax) where {T<:Integer}=(Int(dmin),Int(dmax))
 typed_dminmax(::Type{T},dmin,dmax) where {T<:AbstractFloat}=(Float64(dmin),Float64(dmax))
 typed_dminmax2(::Type{T},dmin,dmax) where {T<:Integer}=(isa(dmin,Tuple) ? (Int(dmin[1]),Int(dmin[2]),Int(dmin[3])) : (Int(dmin),Int(dmin),Int(dmin)), isa(dmax,Tuple) ? (Int(dmax[1]),Int(dmax[2]),Int(dmax[3])) : (Int(dmax),Int(dmax),Int(dmax)))
@@ -148,6 +149,7 @@ typed_dminmax2(::Type{T},dmin,dmax) where {T<:AbstractFloat}=(isa(dmin,Tuple) ? 
 
 mygetval(i)=i
 mygetval(i::Observable)=i[]
+mygetval(i::FixedAx)=-1
 
 
 import Interact
@@ -172,7 +174,7 @@ function plotGeneric(plotObj::ESDLPlot, cube::CubeAPI.AbstractCubeData{T};kwargs
       ix = findAxis(string(sy),axlist)
       if ix > 0
         push!(fixedAxes,axlist[ix])
-        positionobs[ix] = axVal2Index(axlist[ix],val,fuzzy=true)
+        positionobs[ix] = val
       end
     end
 

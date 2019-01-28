@@ -250,8 +250,6 @@ function getlegend(colm,width)
   compose(context(1Measures.w-width,0,width,1),bar,tlabels)
 end
 
-
-import ESDL.Cubes.Mask: isvalid, isocean
 function getMinMax(x::AbstractArray{<:Union{T,Missing}};symmetric=false) where T
   mi=typemax(T)
   ma=typemin(T)
