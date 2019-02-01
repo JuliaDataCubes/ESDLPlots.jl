@@ -72,7 +72,7 @@ function count_to(f,c,i)
   return ni
 end
 
-getWidget(x::CategoricalAxis;label=axname(x))       = dropdown(Dict(zip(x.values,1:length(x.values))),label=label)
+getWidget(x::CategoricalAxis;label=axname(x))       = dropdown(x.values,label=label)
 getWidget(x::RangeAxis{T};label=axname(x)) where {T<:Real} = step(x.values) > 0 ? slider(x.values,label=label) : slider(reverse(x.values),label=label)
 getWidget(x::RangeAxis;label=axname(x))             = slider(x.values,label=label)
 getWidget(x::SpatialPointAxis;label="Spatial Point")= slider(1:length(x),label=label)
@@ -94,7 +94,7 @@ end
 function setPlotAxis(a::FixedVar,axlist,fixedAxes,customobs,positionobs)
   a.depAxis=findAxis(a.depAxis,axlist)
   if a.varVal!=nothing
-    push!(customobs,axVal2Index(axlist[a.depAxis],a.varVal))
+    push!(customobs,a.varVal)
     positionobs[a.depAxis]=0
   else
     push!(customobs,a)
@@ -102,6 +102,7 @@ function setPlotAxis(a::FixedVar,axlist,fixedAxes,customobs,positionobs)
 end
 
 import Interact: observe, Widget
+cart(i::Integer) = CartesianIndex((i,))
 
 function createWidgets(axlist,availableAxis,availableIndices,axlabels,widgets,axtuples,customobs,positionobs)
 
@@ -171,12 +172,12 @@ function plotGeneric(plotObj::ESDLPlot, cube::CubeAPI.AbstractCubeData{T};kwargs
   foreach(t->setPlotAxis(t,axlist,fixedAxes,customobs,positionobs),pAxVars)
 
   for (sy,val) in kwargs
-      ix = findAxis(string(sy),axlist)
-      if ix > 0
-        push!(fixedAxes,axlist[ix])
-        positionobs[ix] = val
-      end
+    ix = findAxis(string(sy),axlist)
+    if ix > 0
+      push!(fixedAxes,axlist[ix])
+      positionobs[ix] = val
     end
+  end
 
   availableIndices=findall(ax->!in(ax,fixedAxes),axlist)
   availableAxis=axlist[availableIndices]

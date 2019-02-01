@@ -98,8 +98,7 @@ end
 function plotCall(p::MAPPlotContin, d::AbstractCubeData, ixaxis, iyaxis, otherinds...)
 
   axlist = caxes(d)
-  inds = ntuple(i->in(i,(ixaxis,iyaxis)) ? (:) : axVal2Index(axlist[i],otherinds[i]), length(otherinds))
-
+  inds = ntuple(i->in(i,(ixaxis,iyaxis)) ? (:) : axVal2Index(axlist[i],otherinds[i],fuzzy=true), length(otherinds))
   a = d[inds...]
 
   if p.dmin==p.dmax
@@ -186,11 +185,10 @@ function plotMAPRGB(cube::CubeAPI.AbstractCubeData{T};dmin=zero(T),dmax=zero(T),
 
   irgb = findAxis(rgbaxis,axlist)
   if length(axlist[irgb])==3 && c1==nothing && c2==nothing && c3==nothing
-    c1=1
-    c2=2
-    c3=3
+    c1=CartesianIndex((1,))
+    c2=CartesianIndex((2,))
+    c3=CartesianIndex((3,))
   end
-
   return plotGeneric(MAPPlotRGB(xaxis,yaxis,rgbaxis,dmin,dmax,c1,c2,c3,misscol,oceancol,cType),cube;kwargs...)
 end
 
