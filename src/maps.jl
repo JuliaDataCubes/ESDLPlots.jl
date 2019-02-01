@@ -305,7 +305,7 @@ function val2col(x,colorm::Dict,misscol,oceancol)
   end
 end
 
-function _makeMaprgb(a::Array{T},mi,ma,colorm,oceancol,misscol,legPos,iscategorical,symmetric,tickspos) where T
+function _makeMaprgb(a::AbstractArray{T},mi,ma,colorm,oceancol,misscol,legPos,iscategorical,symmetric,tickspos) where T
   if iscategorical
     @assert isa(colorm, Tuple)
     colorm,colorm2=colorm
@@ -315,7 +315,7 @@ function _makeMaprgb(a::Array{T},mi,ma,colorm,oceancol,misscol,legPos,iscategori
   end
   colorm, colorm2, mi,ma,getRGBAR(a,colorm,convert(T,mi),convert(T,ma),misscol,oceancol)
 end
-function _makeMap(a::Array{T},mi,ma,colorm,oceancol,misscol,legPos,iscategorical,symmetric,tickspos) where T
+function _makeMap(a::AbstractArray{T},mi,ma,colorm,oceancol,misscol,legPos,iscategorical,symmetric,tickspos) where T
   if !iscategorical
     mi==ma && ((mi,ma)=getMinMax(a,symmetric=symmetric))
   end
