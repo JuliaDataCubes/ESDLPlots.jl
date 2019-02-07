@@ -296,10 +296,8 @@ function val2col(cType,xr,xg,xb,mi,ma,misscol,oceancol)
 end
 
 function val2col(x,colorm::Dict,misscol,oceancol)
-  if !isnan(x)
+  if !ismissing(x) && !isnan(x)
     return get(colorm,x,misscol)
-  #elseif (m & OCEAN)==OCEAN
-  #  return oceancol
   else
     return misscol
   end

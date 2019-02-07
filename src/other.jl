@@ -12,6 +12,7 @@ function plotCall(::XYPlot,d::AbstractCubeData,ixaxis,igroup,otherinds...)
 
   all(ismissing(x1)) && (x1=fill(NaN,length(x1)))
   replace!(x1,missing=>NaN)
+  x1 = Float64.(x1)
 
   if igroup > 0
     igroup < ixaxis && (x1=transpose(x1))
@@ -137,6 +138,5 @@ function plotScatter(cube::AbstractCubeData{T};group=nothing,vsaxis=VariableAxis
 
 end
 
-#export plotHist
-#import ESDL.Proc.DATOnlineStats: HistogramCube, tohist
-#plotHist(c::HistogramCube)=plotScatter(tohist(c),vsaxis="Hist",xaxis="MidPoints",yaxis="Frequency",alongaxis="Bin")
+export plotHist
+plotHist(c::AbstractCubeData;kwargs...)=plotScatter(c;vsaxis="Hist",xaxis="MidPoints",yaxis="Frequency",alongaxis="Bin",kwargs...)

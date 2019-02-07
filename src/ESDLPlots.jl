@@ -22,7 +22,7 @@ import Compose: rectangle, text, line, compose, context, stroke, svgattribute, b
 
 import Plots
 import Plots: plotlyjs, gr, pyplot, plot, bar, scatter
-import StatPlots: groupedbar
+import StatsPlots: groupedbar
 
 const U8=Normed{UInt8,8}
 
@@ -73,7 +73,7 @@ function count_to(f,c,i)
 end
 
 getWidget(x::CategoricalAxis;label=axname(x))       = dropdown(x.values,label=label)
-getWidget(x::RangeAxis{T};label=axname(x)) where {T<:Real} = step(x.values) > 0 ? slider(x.values,label=label) : slider(reverse(x.values),label=label)
+getWidget(x::RangeAxis{T};label=axname(x)) where {T<:Real} = (last(x.values)-first(x.values)) > 0 ? slider(x.values,label=label) : slider(reverse(x.values),label=label)
 getWidget(x::RangeAxis;label=axname(x))             = slider(x.values,label=label)
 getWidget(x::SpatialPointAxis;label="Spatial Point")= slider(1:length(x),label=label)
 
