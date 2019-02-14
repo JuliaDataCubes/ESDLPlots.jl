@@ -77,11 +77,11 @@ getWidget(x::RangeAxis{T};label=axname(x)) where {T<:Real} = (last(x.values)-fir
 getWidget(x::RangeAxis;label=axname(x))             = slider(x.values,label=label)
 getWidget(x::SpatialPointAxis;label="Spatial Point")= slider(1:length(x),label=label)
 
-plotTS(x;kwargs...)=plotXY(x;xaxis=TimeAxis,kwargs...)
+plotTS(x;kwargs...)=plotXY(x;xaxis="Time",kwargs...)
 
 function setPlotAxis(a::FixedAx,axlist,fixedAxes,customobs,positionobs)
-  ix=a.axis==nothing ? 0 : findAxis(a.axis,axlist)
-  if ix>0
+  ix = a.axis===nothing ? nothing : findAxis(a.axis,axlist)
+  if ix !== nothing
     push!(fixedAxes,axlist[ix])
     push!(customobs,ix)
     a.axis=ix
@@ -102,6 +102,7 @@ function setPlotAxis(a::FixedVar,axlist,fixedAxes,customobs,positionobs)
 end
 
 import Interact: observe, Widget
+import InteractBase: throttle
 cart(i::Integer) = CartesianIndex((i,))
 
 function createWidgets(axlist,availableAxis,availableIndices,axlabels,widgets,axtuples,customobs,positionobs)
@@ -117,7 +118,7 @@ function createWidgets(axlist,availableAxis,availableIndices,axlabels,widgets,ax
       elseif isa(at,FixedVar)
         w=getWidget(axlist[at.depAxis],label=at.widgetlabel)
         widgets[Symbol(at.widgetlabel)]=w
-        customobs[icust] = observe(w)
+        customobs[icust] = throttle(1.0,observe(w))
       else
         #println("Skipping selected")
       end
@@ -125,7 +126,7 @@ function createWidgets(axlist,availableAxis,availableIndices,axlabels,widgets,ax
     for i in availableIndices
       w=getWidget(axlist[i])
       widgets[Symbol(axname(axlist[i]))]=w
-      positionobs[i] = observe(w)
+      positionobs[i] = throttle(1.0,observe(w))
     end
   else
     for (icust,at) in enumerate(customobs)
@@ -173,7 +174,7 @@ function plotGeneric(plotObj::ESDLPlot, cube::CubeAPI.AbstractCubeData{T};kwargs
 
   for (sy,val) in kwargs
     ix = findAxis(string(sy),axlist)
-    if ix > 0
+    if ix !== nothing
       push!(fixedAxes,axlist[ix])
       positionobs[ix] = val
     end
@@ -191,7 +192,7 @@ function plotGeneric(plotObj::ESDLPlot, cube::CubeAPI.AbstractCubeData{T};kwargs
   #map(display,widgets)
   #display(s)
   layout = t -> InteractBase.node(:div, map(InteractBase.center, InteractBase.values(InteractBase.components(t)))..., map(InteractBase.center, s))
-  Widget{:ESDLPlot}(widgets,output=Observables.throttle(1.0,s),layout = layout)
+  Widget{:ESDLPlot}(widgets,output=s,layout = layout)
 end
 
 end # module

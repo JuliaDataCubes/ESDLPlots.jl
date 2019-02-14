@@ -132,7 +132,7 @@ Generic plotting tool for cube objects to generate scatter plots, like variable 
 
 If a dimension is not the `vsaxis` or `alongaxis` or `group` and is not fixed through an additional keyword, a slider or dropdown menu will appear to select the axis value.
 """
-function plotScatter(cube::AbstractCubeData{T};group=nothing,vsaxis=VariableAxis,xaxis=nothing,yaxis=nothing,alongaxis=nothing,kwargs...) where T
+function plotScatter(cube::AbstractCubeData{T};group=nothing,vsaxis="Variable",xaxis=nothing,yaxis=nothing,alongaxis=nothing,kwargs...) where T
 
   return plotGeneric(ScatterPlot(vsaxis,alongaxis,group,xaxis,yaxis),cube;kwargs...)
 
