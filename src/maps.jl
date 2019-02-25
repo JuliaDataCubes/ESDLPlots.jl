@@ -135,7 +135,7 @@ If a dimension is neither longitude or latitude and is not fixed through an addi
 If the properties field of `cube` contains a "labels" field with a dictionary mapping field values to
 the name of the class represented.
 """
-function plotMAP(cube::CubeAPI.AbstractCubeData{T};xaxis="Lon", yaxis="Lat", dmin=zero(T),dmax=zero(T),
+function plotMAP(cube::AbstractCubeData{T};xaxis="Lon", yaxis="Lat", dmin=zero(T),dmax=zero(T),
   colorm=:inferno,oceancol=colorant"darkblue",misscol=colorant"gray",symmetric=false, tickspos=[],im_only=false,kwargs...) where T
 
   isa(colorm,Symbol) && (colorm=get(namedcolms,colorm,namedcolms[:inferno]))
@@ -176,7 +176,7 @@ one can create HSL, HSI, HSV or Lab and Luv plots.
 
 If a dimension is neither longitude or latitude and is not fixed through an additional keyword, a slider or dropdown menu will appear to select the axis value.
 """
-function plotMAPRGB(cube::CubeAPI.AbstractCubeData{T};dmin=zero(T),dmax=zero(T),
+function plotMAPRGB(cube::AbstractCubeData{T};dmin=zero(T),dmax=zero(T),
   rgbaxis="Var",oceancol=colorant"darkblue",misscol=colorant"gray",symmetric=false,
   c1 = nothing, c2=nothing, c3=nothing, cType=XYZ, xaxis="Lon",yaxis="Lat",kwargs...) where T
 

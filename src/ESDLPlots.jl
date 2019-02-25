@@ -1,13 +1,12 @@
-__precompile__(false)
 module ESDLPlots
 using ImageMagick
 export plotTS, plotMAP, plotXY, plotScatter, plotMAPRGB
 export plotlyjs, gadfly, gr, pyplot
 using ESDL.Cubes
-using ESDL.CubeAPI
 import ESDL.DAT
-import ESDL.DAT: findAxis,getFrontPerm
+import ESDL.DAT: getFrontPerm
 import ESDL.Cubes.Axes.axname
+import ESDL.Cubes: findAxis, AbstractCubeData
 import Reactive: Signal
 import Interact: slider, dropdown, Observable, observe
 import Colors: RGB, @colorant_str, colormap,  distinguishable_colors
@@ -157,7 +156,7 @@ mygetval(i::FixedAx)=-1
 import Interact
 import InteractBase
 import Observables
-function plotGeneric(plotObj::ESDLPlot, cube::CubeAPI.AbstractCubeData{T};kwargs...) where T
+function plotGeneric(plotObj::ESDLPlot, cube::AbstractCubeData{T};kwargs...) where T
 
 
   axlist=caxes(cube)
