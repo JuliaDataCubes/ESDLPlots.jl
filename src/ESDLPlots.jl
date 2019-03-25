@@ -155,7 +155,7 @@ mygetval(i::FixedAx)=-1
 import Interact
 import InteractBase
 import Observables
-import Widget
+import Widgets
 function plotGeneric(plotObj::ESDLPlot, cube::AbstractCubeData{T};kwargs...) where T
 
 
@@ -194,7 +194,7 @@ function plotGeneric(plotObj::ESDLPlot, cube::AbstractCubeData{T};kwargs...) whe
 
   else
 
-    return plotCall(plotObj,cube,customob...,positionobs...)
+    return plotCall(plotObj,cube,customobs...,positionobs...)
 
   end
 end
