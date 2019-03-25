@@ -11,7 +11,6 @@ import Reactive: Signal
 import Interact: slider, dropdown, Observable, observe
 import Colors: RGB, @colorant_str, colormap,  distinguishable_colors
 import FixedPointNumbers: Normed
-import Base.Cartesian: @ntuple,@nexprs
 import Measures
 import Compose
 import Images
@@ -183,8 +182,8 @@ function plotGeneric(plotObj::ESDLPlot, cube::AbstractCubeData{T};kwargs...) whe
   availableAxis=axlist[availableIndices]
 
   createWidgets(axlist,availableAxis,availableIndices,axlabels,widgets,pAxVars,customobs,positionobs)
-  ofirst = plotCall(plotObj,cube,map(mygetval,customobs)...,map(mygetval,positionobs)...);
-  s=Observable(ofirst)
+  #ofirst = plotCall(plotObj,cube,map(mygetval,customobs)...,map(mygetval,positionobs)...);
+  s=Observable{Any}(nothing)
 
   map!((i...)->plotCall(plotObj,cube,i...),s,customobs...,positionobs...);
 
