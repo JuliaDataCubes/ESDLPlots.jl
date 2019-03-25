@@ -155,7 +155,7 @@ mygetval(i::FixedAx)=-1
 import Interact
 import InteractBase
 import Observables
-import Widgets
+import Widget
 function plotGeneric(plotObj::ESDLPlot, cube::AbstractCubeData{T};kwargs...) where T
 
 
@@ -185,16 +185,16 @@ function plotGeneric(plotObj::ESDLPlot, cube::AbstractCubeData{T};kwargs...) whe
   createWidgets(axlist,availableAxis,availableIndices,axlabels,widgets,pAxVars,customobs,positionobs)
 
   if any(i->isa(i,Observable),customobs) || any(i->isa(i,Observable),positionobs)
+    s=Observable{Any}(" ")
 
-    local ff = (i...)->plotCall(plotObj,cube,i...)
-    s = map(ff,customobs...,positionobs...);
+    map!((i...)->plotCall(plotObj,cube,i...),s,customobs...,positionobs...);
 
     layout = (Widgets.manipulatelayout)((Widgets.get_backend)())
     return Widget{:ESDLPlot}(widgets,output=s,layout = layout)
 
   else
 
-    return plotCall(plotObj,cube,customobs...,positionobs...)
+    return plotCall(plotObj,cube,customob...,positionobs...)
 
   end
 end
