@@ -182,15 +182,20 @@ function plotGeneric(plotObj::ESDLPlot, cube::AbstractCubeData{T};kwargs...) whe
   availableAxis=axlist[availableIndices]
 
   createWidgets(axlist,availableAxis,availableIndices,axlabels,widgets,pAxVars,customobs,positionobs)
-  #ofirst = plotCall(plotObj,cube,map(mygetval,customobs)...,map(mygetval,positionobs)...);
-  s=Observable{Any}(nothing)
 
-  map!((i...)->plotCall(plotObj,cube,i...),s,customobs...,positionobs...);
+  if any(i->isa(i,Observable),customobs) || any(i->isa(i,Observable),positionobs)
+    s=Observable{Any}(" ")
 
-  #map(display,widgets)
-  #display(s)
-  layout = t -> InteractBase.node(:div, map(InteractBase.center, InteractBase.values(InteractBase.components(t)))..., map(InteractBase.center, s))
-  Widget{:ESDLPlot}(widgets,output=s,layout = layout)
+    map!((i...)->plotCall(plotObj,cube,i...),s,customobs...,positionobs...);
+
+    layout = t -> InteractBase.node(:div, map(InteractBase.center, InteractBase.values(InteractBase.components(t)))..., map(InteractBase.center, s))
+    return Widget{:ESDLPlot}(widgets,output=s,layout = layout)
+
+  else
+
+    return plotCall(plotObj,cube,customob...,positionobs...)
+
+  end
 end
 
 end # module
