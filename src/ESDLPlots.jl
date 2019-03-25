@@ -187,14 +187,14 @@ function plotGeneric(plotObj::ESDLPlot, cube::AbstractCubeData{T};kwargs...) whe
   if any(i->isa(i,Observable),customobs) || any(i->isa(i,Observable),positionobs)
 
     local ff = (i...)->plotCall(plotObj,cube,i...)
-    s = map(ff,s,customobs...,positionobs...);
+    s = map(ff,customobs...,positionobs...);
 
     layout = (Widgets.manipulatelayout)((Widgets.get_backend)())
     return Widget{:ESDLPlot}(widgets,output=s,layout = layout)
 
   else
 
-    return plotCall(plotObj,cube,customob...,positionobs...)
+    return plotCall(plotObj,cube,customobs...,positionobs...)
 
   end
 end
