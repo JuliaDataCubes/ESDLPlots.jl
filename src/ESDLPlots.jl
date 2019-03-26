@@ -184,10 +184,17 @@ function plotGeneric(plotObj::ESDLPlot, cube::AbstractCubeData{T};kwargs...) whe
 
   createWidgets(axlist,availableAxis,availableIndices,axlabels,widgets,pAxVars,customobs,positionobs)
 
-  if any(i->isa(i,Observable),customobs) || any(i->isa(i,Observable),positionobs)
+  allobs = [customobs;positionobs]
+
+  if any(i->isassigned(allobs,i) && isa(allobs[i],Observable),1:length(allobs))
+
     s=Observable{Any}(" ")
 
     map!((i...)->plotCall(plotObj,cube,i...),s,customobs...,positionobs...);
+
+    ifirstwig = findfirst(i->isassigned(allobs,i) && isa(allobs[i],Observable),1:length(allobs))
+    firstwig = allobs[ifirstwig]
+    firstwig[] = firstwig[]
 
     layout = (Widgets.manipulatelayout)((Widgets.get_backend)())
     return Widget{:ESDLPlot}(widgets,output=s,layout = layout)

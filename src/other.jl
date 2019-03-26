@@ -18,8 +18,6 @@ function plotCall(::XYPlot,d::AbstractCubeData,ixaxis,igroup,otherinds...)
     igroup < ixaxis && (x1=transpose(x1))
     if isa(axlist[ixaxis],CategoricalAxis)
       plotf = groupedbar
-      println(size(x1))
-      println(axlist[ixaxis].values)
     else
       plotf = plot
     end
