@@ -26,9 +26,9 @@ plotAxVars(p::MAPPlotRGB)=[
 function plotCall(p::MAPPlotRGB, d::AbstractCubeData, ixaxis, iyaxis, irgbaxis, c1,c2,c3,otherinds...)
 
   axlist = caxes(d)
-  inds1 = ntuple(  i->(i==irgbaxis) ? axVal2Index(axlist[i],c1)  : in(i,(ixaxis,iyaxis)) ? (:) : axVal2Index(axlist[i],otherinds[i]), length(otherinds))
-  inds2 = ntuple(  i->(i==irgbaxis) ? axVal2Index(axlist[i],c2)  : in(i,(ixaxis,iyaxis)) ? (:) : axVal2Index(axlist[i],otherinds[i]), length(otherinds))
-  inds3 = ntuple(  i->(i==irgbaxis) ? axVal2Index(axlist[i],c3)  : in(i,(ixaxis,iyaxis)) ? (:) : axVal2Index(axlist[i],otherinds[i]), length(otherinds))
+  inds1 = ntuple(  i->(i==irgbaxis) ? axVal2Index(axlist[i],c1,fuzzy=true)  : in(i,(ixaxis,iyaxis)) ? (:) : axVal2Index(axlist[i],otherinds[i],fuzzy=true), length(otherinds))
+  inds2 = ntuple(  i->(i==irgbaxis) ? axVal2Index(axlist[i],c2,fuzzy=true)  : in(i,(ixaxis,iyaxis)) ? (:) : axVal2Index(axlist[i],otherinds[i],fuzzy=true), length(otherinds))
+  inds3 = ntuple(  i->(i==irgbaxis) ? axVal2Index(axlist[i],c3,fuzzy=true)  : in(i,(ixaxis,iyaxis)) ? (:) : axVal2Index(axlist[i],otherinds[i],fuzzy=true), length(otherinds))
 
   a1 = d[inds1...]
   a2 = d[inds2...]
@@ -69,7 +69,7 @@ toMatrix(a::Array)=reshape(a,size(a,1),size(a,2))
 function plotCall(p::MAPPlotCategory,d::AbstractCubeData, ixaxis, iyaxis,otherinds...)
 
   axlist = caxes(d)
-  inds = ntuple(i->in(i,(ixaxis,iyaxis)) ? (:) : axVal2Index(axlist[i],otherinds[i]), length(otherinds))
+  inds = ntuple(i->in(i,(ixaxis,iyaxis)) ? (:) : axVal2Index(axlist[i],otherinds[i],fuzzy=true), length(otherinds))
 
   a = d[inds...]
 

@@ -75,7 +75,7 @@ getWidget(x::RangeAxis{T};label=axname(x)) where {T<:Real} = (last(x.values)-fir
 getWidget(x::RangeAxis;label=axname(x))             = slider(x.values,label=label)
 getWidget(x::SpatialPointAxis;label="Spatial Point")= slider(1:length(x),label=label)
 
-plotTS(x;kwargs...)=plotXY(x;xaxis="Time",kwargs...)
+plotTS(x;kwargs...)=plotXY(x;xaxis="time",kwargs...)
 
 function setPlotAxis(a::FixedAx,axlist,fixedAxes,customobs,positionobs)
   ix = a.axis===nothing ? nothing : findAxis(a.axis,axlist)
@@ -130,6 +130,7 @@ function createWidgets(axlist,availableAxis,availableIndices,axlabels,widgets,ax
     for (icust,at) in enumerate(customobs)
       if isa(at,FixedAx)
         at.musthave && error("No axis left to put on $label")
+        customobs[icust] = -1
       end
     end
   end

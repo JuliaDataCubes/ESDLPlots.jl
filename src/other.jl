@@ -2,12 +2,12 @@ mutable struct XYPlot <: ESDLPlot
   xaxis
   group
 end
-plotAxVars(p::XYPlot)=[FixedAx(p.xaxis,"X Axis",true,false,1),FixedAx(p.group,"Group",false,false,2)]
+plotAxVars(p::XYPlot)=[FixedAx(p.xaxis,"X Axis",true,true,1),FixedAx(p.group,"Group",false,false,2)]
 
 function plotCall(::XYPlot,d::AbstractCubeData,ixaxis,igroup,otherinds...)
 
   axlist = caxes(d)
-  inds1 = ntuple(  i->in(i,(ixaxis,igroup)) ? (:) : axVal2Index(axlist[i],otherinds[i]), length(otherinds))
+  inds1 = ntuple(  i->in(i,(ixaxis,igroup)) ? (:) : axVal2Index(axlist[i],otherinds[i],fuzzy=true), length(otherinds))
   x1 = d[inds1...]
 
   all(ismissing(x1)) && (x1=fill(NaN,length(x1)))
@@ -71,8 +71,8 @@ plotAxVars(p::ScatterPlot)=[
 function plotCall(::ScatterPlot,d::AbstractCubeData,ivsaxis,ialongaxis,igroup,c1,c2,otherinds...)
 
   axlist = caxes(d)
-  inds1 = ntuple(  i->(i==ivsaxis)    ? axVal2Index(axlist[i],c1)  : (i==ialongaxis) ? (:) : (i==igroup)     ? (:) : axVal2Index(axlist[i],otherinds[i]), length(otherinds))
-  inds2 = ntuple(  i->(i==ivsaxis)    ? axVal2Index(axlist[i],c2)  : (i==ialongaxis) ? (:) : (i==igroup)     ? (:) : axVal2Index(axlist[i],otherinds[i]), length(otherinds))
+  inds1 = ntuple(  i->(i==ivsaxis)    ? axVal2Index(axlist[i],c1,fuzzy=true)  : (i==ialongaxis) ? (:) : (i==igroup)     ? (:) : axVal2Index(axlist[i],otherinds[i],fuzzy=true), length(otherinds))
+  inds2 = ntuple(  i->(i==ivsaxis)    ? axVal2Index(axlist[i],c2,fuzzy=true)  : (i==ialongaxis) ? (:) : (i==igroup)     ? (:) : axVal2Index(axlist[i],otherinds[i],fuzzy=true), length(otherinds))
   x1 = d[inds1...]
   x2 = d[inds2...]
 
