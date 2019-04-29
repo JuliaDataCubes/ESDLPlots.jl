@@ -129,7 +129,7 @@ function createWidgets(axlist,availableAxis,availableIndices,axlabels,widgets,ax
   else
     for (icust,at) in enumerate(customobs)
       if isa(at,FixedAx)
-        at.musthave && error("No axis left to put on $label")
+        at.musthave && error("No axis left to put on $(at.widgetlabel)")
         customobs[icust] = -1
       end
     end
