@@ -1,6 +1,7 @@
 abstract type MAPPlot <: ESDLPlot end
 import Colors: Color
 import ESDL.Cubes: cubeproperties
+import ESDL.Cubes.Axes: get_step, half
 
 mutable struct MAPPlotRGB <: MAPPlot
   xaxis
@@ -14,6 +15,7 @@ mutable struct MAPPlotRGB <: MAPPlot
   misscol::Color
   oceancol::Color
   cType
+  overlay
 end
 plotAxVars(p::MAPPlotRGB)=[
   FixedAx(p.xaxis,"X Axis",true,false,1),
@@ -63,6 +65,7 @@ mutable struct MAPPlotCategory <: MAPPlotMapped
   xaxis
   yaxis
   im_only
+  overlay
 end
 
 toMatrix(a::Array)=reshape(a,size(a,1),size(a,2))
@@ -73,12 +76,51 @@ function plotCall(p::MAPPlotCategory,d::AbstractCubeData, ixaxis, iyaxis,otherin
 
   a = d[inds...]
 
-
   if p.im_only
     _makeMaprgb(a,0.0,0.0,(p.colorm,p.colorm2),p.oceancol,p.misscol,:right,true,false,[])[5]
   else
-    _makeMap(a,0.0,0.0,(p.colorm,p.colorm2),p.oceancol,p.misscol,:right,true,false,[])
+    _makeMap(a,0.0,0.0,(p.colorm,p.colorm2),p.oceancol,p.misscol,:right,true,false,[],p.overlay)
   end
+end
+
+import Shapefile
+#Here comes some Shapefile stuff
+#PesudoMercator
+#y2lat(y) = (2 * atan(exp( y/6378137)) - pi/2) * 180 / pi
+#x2lon(x) = (x/6378137)*180/pi
+x2lon(x) = x
+y2lat(x) = x
+getXY(p::Shapefile.Polygon) = map(i->x2lon(i.x),p.points),map(i->y2lat(i.y),p.points)
+getarea(ii) = abs((ii.MBR.right-ii.MBR.left)*(ii.MBR.top-ii.MBR.bottom))
+allpoints(rect) = ((rect.left, rect.bottom),(rect.right,rect.bottom), (rect.right,rect.top),(rect.left,rect.top))
+pointinrect(p,r) = (r.left < p[1] < r.right) && (r.bottom < p[2] < r.top)
+function getXY2(p::Shapefile.Polygon)
+    points = map(i->(x2lon(i.x),y2lat(i.y)),p.points)
+    map(1:length(p.parts)) do ipart
+        i0 = p.parts[ipart]+1
+        iend = ipart == length(p.parts) ? length(p.points) : p.parts[ipart+1]
+        points[i0:iend]
+    end
+end
+function getshapeplot(shapepath,userbb;npoly=100)
+    handle = open(shapepath, "r") do io
+        read(io, Shapefile.Handle)
+    end
+    p = handle.shapes;
+    bbs = map(i->(left = x2lon(i.MBR.left), right = x2lon(i.MBR.right), top = y2lat(i.MBR.top), bottom=y2lat(i.MBR.bottom)),p)
+    allp = allpoints(userbb)
+    filter!(p) do i
+        mbr = (left = x2lon(i.MBR.left), right = x2lon(i.MBR.right), top = y2lat(i.MBR.top), bottom=y2lat(i.MBR.bottom))
+        let usb = userbb, alp = allp
+            any(i->pointinrect(i,usb),allpoints(mbr)) || any(i->pointinrect(i,mbr),allp)
+        end
+    end
+    xys = Vector{Tuple{Float64,Float64}}[]
+    foreach(p) do pi
+      append!(xys,getXY2(pi))
+    end
+    polBB = Compose.UnitBox(userbb.left,userbb.top,userbb.right-userbb.left, userbb.bottom-userbb.top)
+    earthland = Compose.compose(context(units = polBB),Compose.line(xys))
 end
 
 
@@ -93,6 +135,7 @@ mutable struct MAPPlotContin <: MAPPlotMapped
   yaxis
   tickspos
   im_only
+  overlay
 end
 
 function plotCall(p::MAPPlotContin, d::AbstractCubeData, ixaxis, iyaxis, otherinds...)
@@ -111,8 +154,18 @@ function plotCall(p::MAPPlotContin, d::AbstractCubeData, ixaxis, iyaxis, otherin
   if p.im_only
     _makeMaprgb(a,mi,ma,p.colorm,p.oceancol,p.misscol,:bottom,false,p.symmetric,p.tickspos)[5]
   else
-    _makeMap(a,mi,ma,p.colorm,p.oceancol,p.misscol,:bottom,false,p.symmetric,p.tickspos)
+    _makeMap(a,mi,ma,p.colorm,p.oceancol,p.misscol,:bottom,false,p.symmetric,p.tickspos,p.overlay)
   end
+end
+
+function interpretoverlay(overlay,xaxis,yaxis,axlist,npoly)
+  if overlay !== nothing
+    xax,yax = getAxis(xaxis,axlist),getAxis(yaxis,axlist)
+    xstep,ystep = get_step(xax.values),get_step(yax.values)
+    userbb = (left = first(xax.values)-half(xstep), right = last(xax.values)+half(xstep), top = first(yax.values)-half(ystep), bottom = last(yax.values)+half(ystep))
+    overlay = getshapeplot(overlay,userbb,npoly=npoly)
+  end
+  overlay
 end
 
 """
@@ -136,7 +189,8 @@ If the properties field of `cube` contains a "labels" field with a dictionary ma
 the name of the class represented.
 """
 function plotMAP(cube::AbstractCubeData{T};xaxis="Lon", yaxis="Lat", dmin=zero(T),dmax=zero(T),
-  colorm=:inferno,oceancol=colorant"darkblue",misscol=colorant"gray",symmetric=false, tickspos=[],im_only=false,kwargs...) where T
+  colorm=:inferno,oceancol=colorant"darkblue",misscol=colorant"gray",symmetric=false, tickspos=[],im_only=false,
+  overlay=nothing,npoly = 100, kwargs...) where T
 
   isa(colorm,Symbol) && (colorm=get(namedcolms,colorm,namedcolms[:inferno]))
   dmin,dmax=typed_dminmax(T,dmin,dmax)
@@ -144,14 +198,16 @@ function plotMAP(cube::AbstractCubeData{T};xaxis="Lon", yaxis="Lat", dmin=zero(T
 
   props=cubeproperties(cube)
 
+  overlay = interpretoverlay(overlay, xaxis,yaxis,axlist,npoly)
+
   if haskey(props,"labels")
     labels = props["labels"]
     _colorm  = distinguishable_colors(length(labels)+2,[misscol,oceancol])[3:end]
     colorm   = Dict(k=>_colorm[i] for (i,k) in enumerate(keys(labels)))
     colorm2  = Dict(k=>_colorm[i] for (i,k) in enumerate(values(labels)))
-    plotGeneric(MAPPlotCategory(colorm,colorm2,oceancol,misscol,xaxis,yaxis,im_only),cube;kwargs...)
+    plotGeneric(MAPPlotCategory(colorm,colorm2,oceancol,misscol,xaxis,yaxis,im_only,overlay),cube;kwargs...)
   else
-    plotGeneric(MAPPlotContin(colorm,dmin,dmax,symmetric,oceancol,misscol,xaxis,yaxis,tickspos,im_only),cube;kwargs...)
+    plotGeneric(MAPPlotContin(colorm,dmin,dmax,symmetric,oceancol,misscol,xaxis,yaxis,tickspos,im_only,overlay),cube;kwargs...)
   end
 end
 
@@ -178,10 +234,13 @@ If a dimension is neither longitude or latitude and is not fixed through an addi
 """
 function plotMAPRGB(cube::AbstractCubeData{T};dmin=zero(T),dmax=zero(T),
   rgbaxis="Var",oceancol=colorant"darkblue",misscol=colorant"gray",symmetric=false,
-  c1 = nothing, c2=nothing, c3=nothing, cType=XYZ, xaxis="Lon",yaxis="Lat",kwargs...) where T
+  c1 = nothing, c2=nothing, c3=nothing, cType=XYZ, xaxis="Lon",yaxis="Lat",
+  overlay=nothing, npoly=100, kwargs...) where T
 
   dmin,dmax = typed_dminmax2(T,dmin,dmax)
   axlist    = caxes(cube)
+
+  overlay = interpretoverlay(overlay,xaxis,yaxis,axlist,npoly)
 
   irgb = findAxis(rgbaxis,axlist)
   if length(axlist[irgb])==3 && c1==nothing && c2==nothing && c3==nothing
@@ -189,7 +248,7 @@ function plotMAPRGB(cube::AbstractCubeData{T};dmin=zero(T),dmax=zero(T),
     c2=CartesianIndex((2,))
     c3=CartesianIndex((3,))
   end
-  return plotGeneric(MAPPlotRGB(xaxis,yaxis,rgbaxis,dmin,dmax,c1,c2,c3,misscol,oceancol,cType),cube;kwargs...)
+  return plotGeneric(MAPPlotRGB(xaxis,yaxis,rgbaxis,dmin,dmax,c1,c2,c3,misscol,oceancol,cType,overlay),cube;kwargs...)
 end
 
 @noinline getRGBAR(a,colorm,mi,ma,misscol,oceancol)=RGB{U8}[val2col(a[i,j],colorm,mi,ma,misscol,oceancol) for j=1:size(a,2),i=1:size(a,1)]
@@ -313,16 +372,29 @@ function _makeMaprgb(a::AbstractArray{T},mi,ma,colorm,oceancol,misscol,legPos,is
   end
   colorm, colorm2, mi,ma,getRGBAR(a,colorm,convert(T,mi),convert(T,ma),misscol,oceancol)
 end
-function _makeMap(a::AbstractArray{T},mi,ma,colorm,oceancol,misscol,legPos,iscategorical,symmetric,tickspos) where T
+function _makeMap(a::AbstractArray{T},mi,ma,colorm,oceancol,misscol,legPos,iscategorical,symmetric,tickspos,overlay) where T
   if !iscategorical
     mi==ma && ((mi,ma)=getMinMax(a,symmetric=symmetric))
   end
   colorm, colorm2, mi,ma,rgbar = _makeMaprgb(a,mi,ma,colorm,oceancol,misscol,legPos,iscategorical,symmetric,tickspos)
   pngbuf=IOBuffer()
   show(pngbuf,"image/png",rgbar)
+  if overlay !== nothing
+    ratio = size(rgbar,1)/size(rgbar,2)
+    if ratio<1
+      ww,hh = Measures.w, Measures.w*ratio
+    else
+      ww,hh = Measures.h/ratio, Measures.h
+    end
+    backim = compose(context(0,0,ww,hh),bitmap("image/png",pngbuf.data,0,0,1Measures.w,1Measures.h))
+    earthland = compose(context(0,0,ww,hh),overlay,Compose.fill(RGBA(0,0,0,0)),Compose.stroke("white"),Compose.linewidth(0.2))
+    rgbar = compose(context(),earthland, backim)
+  else
+    rgbar = compose(context(0,0,1,1),bitmap("image/png",pngbuf.data,0,0,1,1))
+  end
   legheight=legPos==:bottom ? max(0.1*Measures.h,1.6Measures.cm) : 0Measures.h
   legwidth =legPos==:right  ? max(0.2*Measures.w,3.2Measures.cm) : 0Measures.w
-  themap=compose(context(0,0,1Measures.w-legwidth,1Measures.h-legheight),bitmap("image/png",pngbuf.data,0,0,1,1))
+  themap=compose(context(0,0,1Measures.w-legwidth,1Measures.h-legheight),rgbar)
   theleg=iscategorical ? getlegend(colorm2,legwidth) : getlegend(mi,ma,colorm,legheight,tickspos)
   compose(context(),themap,theleg)
 end
