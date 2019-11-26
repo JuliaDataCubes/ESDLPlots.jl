@@ -1,7 +1,7 @@
 abstract type MAPPlot <: ESDLPlot end
 import Colors: Color
 import ESDL.Cubes: cubeproperties
-import ESDL.Cubes.Axes: get_step, half
+import ESDL.Cubes.Axes: get_step, abshalf
 
 mutable struct MAPPlotRGB <: MAPPlot
   xaxis
@@ -162,7 +162,7 @@ function interpretoverlay(overlay,xaxis,yaxis,axlist,npoly)
   if overlay !== nothing
     xax,yax = getAxis(xaxis,axlist),getAxis(yaxis,axlist)
     xstep,ystep = get_step(xax.values),get_step(yax.values)
-    userbb = (left = first(xax.values)-half(xstep), right = last(xax.values)+half(xstep), top = first(yax.values)-half(ystep), bottom = last(yax.values)+half(ystep))
+    userbb = (left = first(xax.values)-abshalf(xstep), right = last(xax.values)+abshalf(xstep), top = first(yax.values)-abshalf(ystep), bottom = last(yax.values)+abshalf(ystep))
     overlay = getshapeplot(overlay,userbb,npoly=npoly)
   end
   overlay
