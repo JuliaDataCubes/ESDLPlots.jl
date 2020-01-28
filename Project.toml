@@ -26,3 +26,4 @@ Widgets = "cc8bc4a8-27d6-5769-a93b-9d913e69aa62"
 
 [compat]
 Compose = "0.8"
+Reactive = "0.8"
