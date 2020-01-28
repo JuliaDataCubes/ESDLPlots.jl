@@ -24,6 +24,9 @@ Showoff = "992d4aef-0814-514b-bc4d-f2e9a6c4116f"
 StatsPlots = "f3b207a7-027a-5e70-b257-86293d7955fd"
 Widgets = "cc8bc4a8-27d6-5769-a93b-9d913e69aa62"
 
+[compat]
+Compose = "0.8"
+
 [extras]
 Test = "8dfed614-e22c-5e08-85e1-65c5234f0b40"
 
