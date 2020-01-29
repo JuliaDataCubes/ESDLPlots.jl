@@ -25,5 +25,6 @@ StatsPlots = "f3b207a7-027a-5e70-b257-86293d7955fd"
 Widgets = "cc8bc4a8-27d6-5769-a93b-9d913e69aa62"
 
 [compat]
+Colors = "0.11"
 Compose = "0.8"
 ImageMagick = "1.1"
