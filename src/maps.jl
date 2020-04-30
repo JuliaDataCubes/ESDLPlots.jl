@@ -1,6 +1,6 @@
 abstract type MAPPlot <: ESDLPlot end
 import Colors: Color
-import ESDL.Cubes: cubeproperties
+using YAXArrayBase: getattributes
 import ESDL.Cubes.Axes: get_step, abshalf
 
 mutable struct MAPPlotRGB <: MAPPlot
@@ -196,7 +196,7 @@ function plotMAP(cube::AbstractCubeData{T};xaxis="Lon", yaxis="Lat", dmin=zero(T
   dmin,dmax=typed_dminmax(T,dmin,dmax)
   axlist=caxes(cube)
 
-  props=cubeproperties(cube)
+  props=getattributes(cube)
 
   overlay = interpretoverlay(overlay, xaxis,yaxis,axlist,npoly)
 

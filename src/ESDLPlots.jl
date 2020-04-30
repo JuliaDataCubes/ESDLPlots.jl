@@ -3,24 +3,20 @@ using ImageMagick
 export plotTS, plotMAP, plotXY, plotScatter, plotMAPRGB
 export plotlyjs, gadfly, gr, pyplot
 using ESDL.Cubes
-import ESDL.DAT
-import ESDL.DAT: getFrontPerm
-import ESDL.Cubes.Axes.axname
-import ESDL.Cubes: findAxis, AbstractCubeData
-import Reactive: Signal
-import Interact: slider, dropdown, Observable, observe
-import Colors: RGB, @colorant_str, colormap,  distinguishable_colors
-import FixedPointNumbers: Normed
-import Measures
-import Compose
-import Images
-import DataStructures: OrderedDict
-import PlotUtils: optimize_ticks, cgrad
-import Compose: rectangle, text, line, compose, context, stroke, svgattribute, bitmap, HCenter, VBottom, HRight, VCenter
-
-import Plots
-import Plots: plotlyjs, gr, pyplot, plot, bar, scatter
-import StatsPlots: groupedbar
+using ESDL.Cubes.Axes: axname, findAxis, CategoricalAxis, RangeAxis, CubeAxis,
+  axVal2Index
+using ESDL.Cubes: AbstractCubeData, caxes
+using Interact: slider, dropdown, Observable, observe
+using Colors: RGB, @colorant_str, colormap,  distinguishable_colors
+using FixedPointNumbers: Normed
+using Measures: Measures
+using Compose: Compose, rectangle, text, line, compose, context,
+  stroke, svgattribute, bitmap, HCenter, VBottom, HRight, VCenter
+using Images: Images
+using DataStructures: OrderedDict
+using PlotUtils: optimize_ticks, cgrad
+using Plots: Plots, plotlyjs, gr, pyplot, plot, bar, scatter
+using StatsPlots: groupedbar
 
 const U8=Normed{UInt8,8}
 
@@ -50,12 +46,7 @@ end
 include("maps.jl")
 include("other.jl")
 
-
-toYr(tx::TimeAxis)=((tx.values.startyear+(tx.values.startst-1)/tx.values.NPY):(1.0/tx.values.NPY):(tx.values.stopyear+(tx.values.stopst-1)/tx.values.NPY))-(tx.values.startyear+(tx.values.startst-1)/tx.values.NPY)
-
 r1(x)=reshape(x,length(x))
-prepAx(x)=x.values
-prepAx(x::TimeAxis)=toYr(x)
 function repAx(x,idim,ax)
   l=length(x)
   inrep=prod(size(x)[1:idim-1])
@@ -73,7 +64,6 @@ end
 getWidget(x::CategoricalAxis;label=axname(x))       = dropdown(x.values,label=label)
 getWidget(x::RangeAxis{T};label=axname(x)) where {T<:Real} = (last(x.values)-first(x.values)) > 0 ? slider(x.values,label=label) : slider(reverse(x.values),label=label)
 getWidget(x::RangeAxis;label=axname(x))             = slider(x.values,label=label)
-getWidget(x::SpatialPointAxis;label="Spatial Point")= slider(1:length(x),label=label)
 
 plotTS(x;kwargs...)=plotXY(x;xaxis="time",kwargs...)
 
@@ -108,7 +98,7 @@ function createWidgets(axlist,availableAxis,availableIndices,axlabels,widgets,ax
   if !isempty(availableAxis)
     for (icust,at) in enumerate(customobs)
       if isa(at,FixedAx)
-        options = collect(at.musthave ? zip(axlabels[availableIndices],availableIndices) : zip(["None";axlabels[availableIndices]],[0;availableIndices]))
+        options = collect(at.musthave ? zip(axlabels[availableIndices],availableIndices) : zip(["None",axlabels[availableIndices]...],[0,availableIndices...]))
         axmenu  = dropdown(OrderedDict(options),label=at.widgetlabel,value=options[1][2],value_label=options[1][1])
         sax = observe(axmenu)
         widgets[Symbol(at.widgetlabel)]=axmenu

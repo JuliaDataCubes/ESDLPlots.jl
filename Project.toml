@@ -23,6 +23,8 @@ Shapefile = "8e980c4a-a4fe-5da2-b3a7-4b4b0353a2f4"
 Showoff = "992d4aef-0814-514b-bc4d-f2e9a6c4116f"
 StatsPlots = "f3b207a7-027a-5e70-b257-86293d7955fd"
 Widgets = "cc8bc4a8-27d6-5769-a93b-9d913e69aa62"
+YAXArrayBase = "90b8fcef-0c2d-428d-9c56-5f86629e9d14"
+
 
 [compat]
 Compose = "0.8"
