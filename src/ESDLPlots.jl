@@ -2,10 +2,10 @@ module ESDLPlots
 using ImageMagick
 export plotTS, plotMAP, plotXY, plotScatter, plotMAPRGB
 export plotlyjs, gadfly, gr, pyplot
-using ESDL.Cubes
-using ESDL.Cubes.Axes: axname, findAxis, CategoricalAxis, RangeAxis, CubeAxis,
+using YAXArrays: Cubes
+using YAXArrays.Cubes.Axes: axname, findAxis, CategoricalAxis, RangeAxis, CubeAxis,
   axVal2Index
-using ESDL.Cubes: AbstractCubeData, caxes
+using YAXArrays.Cubes: AbstractCubeData, caxes
 using Interact: slider, dropdown, Observable, observe
 using Colors: RGB, @colorant_str, colormap,  distinguishable_colors
 using FixedPointNumbers: Normed

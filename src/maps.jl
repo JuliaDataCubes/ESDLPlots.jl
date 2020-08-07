@@ -1,7 +1,7 @@
 abstract type MAPPlot <: ESDLPlot end
 import Colors: Color
 using YAXArrayBase: getattributes
-import ESDL.Cubes.Axes: get_step, abshalf
+import YAXArrays.Cubes.Axes: get_step, abshalf
 
 mutable struct MAPPlotRGB <: MAPPlot
   xaxis
