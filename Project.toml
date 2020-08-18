@@ -26,6 +26,7 @@ Widgets = "cc8bc4a8-27d6-5769-a93b-9d913e69aa62"
 
 [compat]
 Compose = "0.8"
+Plots = "1.6"
 
 [extras]
 Test = "8dfed614-e22c-5e08-85e1-65c5234f0b40"
