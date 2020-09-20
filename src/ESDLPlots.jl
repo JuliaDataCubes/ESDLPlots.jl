@@ -5,7 +5,7 @@ export plotlyjs, gadfly, gr, pyplot
 using YAXArrays: Cubes
 using YAXArrays.Cubes.Axes: axname, findAxis, CategoricalAxis, RangeAxis, CubeAxis,
   axVal2Index
-using YAXArrays.Cubes: AbstractCubeData, caxes
+using YAXArrays.Cubes: caxes
 using Interact: slider, dropdown, Observable, observe
 using Colors: RGB, @colorant_str, colormap,  distinguishable_colors
 using FixedPointNumbers: Normed
@@ -147,7 +147,7 @@ import Interact
 import InteractBase
 import Observables
 import Widgets
-function plotGeneric(plotObj::ESDLPlot, cube::AbstractCubeData{T};kwargs...) where T
+function plotGeneric(plotObj::ESDLPlot, cube;kwargs...)
 
 
   axlist=caxes(cube)

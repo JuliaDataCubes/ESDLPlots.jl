@@ -25,7 +25,7 @@ plotAxVars(p::MAPPlotRGB)=[
   FixedVar(p.rgbaxis,p.c_2,channel_names(p.cType)[2],true),
   FixedVar(p.rgbaxis,p.c_3,channel_names(p.cType)[3],true)
   ]
-function plotCall(p::MAPPlotRGB, d::AbstractCubeData, ixaxis, iyaxis, irgbaxis, c1,c2,c3,otherinds...)
+function plotCall(p::MAPPlotRGB, d, ixaxis, iyaxis, irgbaxis, c1,c2,c3,otherinds...)
 
   axlist = caxes(d)
   inds1 = ntuple(  i->(i==irgbaxis) ? axVal2Index(axlist[i],c1,fuzzy=true)  : in(i,(ixaxis,iyaxis)) ? (:) : axVal2Index(axlist[i],otherinds[i],fuzzy=true), length(otherinds))
@@ -69,7 +69,7 @@ mutable struct MAPPlotCategory <: MAPPlotMapped
 end
 
 toMatrix(a::Array)=reshape(a,size(a,1),size(a,2))
-function plotCall(p::MAPPlotCategory,d::AbstractCubeData, ixaxis, iyaxis,otherinds...)
+function plotCall(p::MAPPlotCategory,d, ixaxis, iyaxis,otherinds...)
 
   axlist = caxes(d)
   inds = ntuple(i->in(i,(ixaxis,iyaxis)) ? (:) : axVal2Index(axlist[i],otherinds[i],fuzzy=true), length(otherinds))
@@ -138,7 +138,7 @@ mutable struct MAPPlotContin <: MAPPlotMapped
   overlay
 end
 
-function plotCall(p::MAPPlotContin, d::AbstractCubeData, ixaxis, iyaxis, otherinds...)
+function plotCall(p::MAPPlotContin, d, ixaxis, iyaxis, otherinds...)
 
   axlist = caxes(d)
   inds = ntuple(i->in(i,(ixaxis,iyaxis)) ? (:) : axVal2Index(axlist[i],otherinds[i],fuzzy=true), length(otherinds))
@@ -169,7 +169,7 @@ function interpretoverlay(overlay,xaxis,yaxis,axlist,npoly)
 end
 
 """
-    plotMAP(cube::AbstractCubeData; dmin=datamin, dmax=datamax, colorm=colormap("oranges"), oceancol=colorant"darkblue", misscol=colorant"gray", kwargs...)
+    plotMAP(cube; dmin=datamin, dmax=datamax, colorm=colormap("oranges"), oceancol=colorant"darkblue", misscol=colorant"gray", kwargs...)
 
 Map plotting tool for cube objects, can be called on any type of cube data
 
@@ -188,12 +188,12 @@ If a dimension is neither longitude or latitude and is not fixed through an addi
 If the properties field of `cube` contains a "labels" field with a dictionary mapping field values to
 the name of the class represented.
 """
-function plotMAP(cube::AbstractCubeData{T};xaxis="Lon", yaxis="Lat", dmin=zero(T),dmax=zero(T),
+function plotMAP(cube;xaxis="Lon", yaxis="Lat", dmin=zero(eltype(cube)),dmax=zero(eltype(cube)),
   colorm=:inferno,oceancol=colorant"darkblue",misscol=colorant"gray",symmetric=false, tickspos=[],im_only=false,
-  overlay=nothing,npoly = 100, kwargs...) where T
+  overlay=nothing,npoly = 100, kwargs...)
 
   isa(colorm,Symbol) && (colorm=get(namedcolms,colorm,namedcolms[:inferno]))
-  dmin,dmax=typed_dminmax(T,dmin,dmax)
+  dmin,dmax=typed_dminmax(eltype(cube),dmin,dmax)
   axlist=caxes(cube)
 
   props=getattributes(cube)
@@ -212,7 +212,7 @@ function plotMAP(cube::AbstractCubeData{T};xaxis="Lon", yaxis="Lat", dmin=zero(T
 end
 
 """
-    plotMAPRGB(cube::AbstractCubeData; dmin=datamin, dmax=datamax, colorm=colormap("oranges"), oceancol=colorant"darkblue", misscol=colorant"gray", kwargs...)
+    plotMAPRGB(cube; dmin=datamin, dmax=datamax, colorm=colormap("oranges"), oceancol=colorant"darkblue", misscol=colorant"gray", kwargs...)
 
 Map plotting tool for colored plots that use up to 3 variables as input into the several color channels.
 Several color representations from the `Colortypes.jl` package are supported, so that besides RGB (XYZ)-plots
@@ -232,7 +232,7 @@ one can create HSL, HSI, HSV or Lab and Luv plots.
 
 If a dimension is neither longitude or latitude and is not fixed through an additional keyword, a slider or dropdown menu will appear to select the axis value.
 """
-function plotMAPRGB(cube::AbstractCubeData{T};dmin=zero(T),dmax=zero(T),
+function plotMAPRGB(cube;dmin=zero(eltype(cube)),dmax=zero(eltype(cube)),
   rgbaxis="Var",oceancol=colorant"darkblue",misscol=colorant"gray",symmetric=false,
   c1 = nothing, c2=nothing, c3=nothing, cType=XYZ, xaxis="Lon",yaxis="Lat",
   overlay=nothing, npoly=100, kwargs...) where T
