@@ -4,7 +4,7 @@ mutable struct XYPlot <: ESDLPlot
 end
 plotAxVars(p::XYPlot)=[FixedAx(p.xaxis,"X Axis",true,true,1),FixedAx(p.group,"Group",false,false,2)]
 
-function plotCall(::XYPlot,d::AbstractCubeData,ixaxis,igroup,otherinds...)
+function plotCall(::XYPlot,d,ixaxis,igroup,otherinds...)
 
   axlist = caxes(d)
   inds1 = ntuple(  i->in(i,(ixaxis,igroup)) ? (:) : axVal2Index(axlist[i],otherinds[i],fuzzy=true), length(otherinds))
@@ -35,7 +35,7 @@ end
 nplotCubes(::XYPlot)=1
 
 """
-    plotXY(cube::AbstractCubeData; group=0, xaxis=-1, kwargs...)
+    plotXY(cube; group=0, xaxis=-1, kwargs...)
 
 Generic plotting tool for cube objects, can be called on any type of cube data.
 
@@ -47,7 +47,7 @@ Generic plotting tool for cube objects, can be called on any type of cube data.
 
 If a dimension is not the x axis or group variable and is not fixed through an additional keyword, a slider or dropdown menu will appear to select the axis value.
 """
-function plotXY(cube::AbstractCubeData{T};group=nothing,xaxis=nothing,kwargs...) where T
+function plotXY(cube;group=nothing,xaxis=nothing,kwargs...)
 
   return plotGeneric(XYPlot(xaxis,group),cube;kwargs...)
 
@@ -68,7 +68,7 @@ plotAxVars(p::ScatterPlot)=[
   FixedVar(p.vsaxis,p.c_2,"Y Axis",true)
   ]
 
-function plotCall(::ScatterPlot,d::AbstractCubeData,ivsaxis,ialongaxis,igroup,c1,c2,otherinds...)
+function plotCall(::ScatterPlot,d,ivsaxis,ialongaxis,igroup,c1,c2,otherinds...)
 
   axlist = caxes(d)
   inds1 = ntuple(  i->(i==ivsaxis)    ? axVal2Index(axlist[i],c1,fuzzy=true)  : (i==ialongaxis) ? (:) : (i==igroup)     ? (:) : axVal2Index(axlist[i],otherinds[i],fuzzy=true), length(otherinds))
@@ -115,7 +115,7 @@ function plotCall(::ScatterPlot,d::AbstractCubeData,ivsaxis,ialongaxis,igroup,c1
   p
 end
 """
-    plotScatter(cube::AbstractCubeData; vsaxis=VariableAxis, alongaxis=0, group=0, xaxis=0, yaxis=0, kwargs...)
+    plotScatter(cube; vsaxis=VariableAxis, alongaxis=0, group=0, xaxis=0, yaxis=0, kwargs...)
 
 Generic plotting tool for cube objects to generate scatter plots, like variable `A` against variable `B`. Can be called on any type of cube data.
 
@@ -130,11 +130,11 @@ Generic plotting tool for cube objects to generate scatter plots, like variable 
 
 If a dimension is not the `vsaxis` or `alongaxis` or `group` and is not fixed through an additional keyword, a slider or dropdown menu will appear to select the axis value.
 """
-function plotScatter(cube::AbstractCubeData{T};group=nothing,vsaxis="Variable",xaxis=nothing,yaxis=nothing,alongaxis=nothing,kwargs...) where T
+function plotScatter(cube;group=nothing,vsaxis="Variable",xaxis=nothing,yaxis=nothing,alongaxis=nothing,kwargs...)
 
   return plotGeneric(ScatterPlot(vsaxis,alongaxis,group,xaxis,yaxis),cube;kwargs...)
 
 end
 
 export plotHist
-plotHist(c::AbstractCubeData;kwargs...)=plotScatter(c;vsaxis="Hist",xaxis="MidPoints",yaxis="Frequency",alongaxis="Bin",kwargs...)
+plotHist(c;kwargs...)=plotScatter(c;vsaxis="Hist",xaxis="MidPoints",yaxis="Frequency",alongaxis="Bin",kwargs...)
