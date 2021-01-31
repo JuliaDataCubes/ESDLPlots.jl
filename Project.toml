@@ -27,7 +27,7 @@ YAXArrayBase = "90b8fcef-0c2d-428d-9c56-5f86629e9d14"
 YAXArrays = "c21b50f5-aa40-41ea-b809-c0f5e47bfa5c"
 
 [compat]
-Compose = "0.8"
+Compose = "0.8, 0.9"
 
 [extras]
 Test = "8dfed614-e22c-5e08-85e1-65c5234f0b40"
