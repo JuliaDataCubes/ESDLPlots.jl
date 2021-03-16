@@ -11,6 +11,7 @@ using Observables: Observable, observe, throttle
 using Colors: RGB, @colorant_str, colormap,  distinguishable_colors
 using FixedPointNumbers: Normed
 using Measures: Measures
+using InteractBase: InteractBase
 using Compose: Compose, rectangle, text, line, compose, context,
   stroke, svgattribute, bitmap, HCenter, VBottom, HRight, VCenter
 using Images: Images
