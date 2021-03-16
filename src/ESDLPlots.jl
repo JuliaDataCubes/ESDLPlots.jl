@@ -6,7 +6,8 @@ using YAXArrays: Cubes
 using YAXArrays.Cubes.Axes: axname, findAxis, CategoricalAxis, RangeAxis, CubeAxis,
   axVal2Index
 using YAXArrays.Cubes: caxes
-using Interact: slider, dropdown, Observable, observe
+using Widgets: slider, dropdown, Widget, Widgets
+using Observables: Observable, observe, throttle
 using Colors: RGB, @colorant_str, colormap,  distinguishable_colors
 using FixedPointNumbers: Normed
 using Measures: Measures
@@ -22,11 +23,6 @@ const U8=Normed{UInt8,8}
 
 
 abstract type ESDLPlot end
-"Expression to evaluate after the data is loaded"
-getafterEx(::ESDLPlot)=Expr(:block)
-
-"Setting fixed variables"
-getFixedVars(::ESDLPlot,cube)=Expr(:block)
 
 mutable struct FixedAx
   axis
@@ -45,21 +41,6 @@ end
 
 include("maps.jl")
 include("other.jl")
-
-r1(x)=reshape(x,length(x))
-function repAx(x,idim,ax)
-  l=length(x)
-  inrep=prod(size(x)[1:idim-1])
-  outrep=div(l,(inrep*size(x,idim)))
-  repeat(collect(ax),inner=[inrep],outer=[outrep])
-end
-function count_to(f,c,i)
-  ni=0
-  for ind=1:i
-    f(c[ind]) && (ni+=1)
-  end
-  return ni
-end
 
 getWidget(x::CategoricalAxis;label=axname(x))       = dropdown(x.values,label=label)
 getWidget(x::RangeAxis{T};label=axname(x)) where {T<:Real} = (last(x.values)-first(x.values)) > 0 ? slider(x.values,label=label) : slider(reverse(x.values),label=label)
@@ -89,8 +70,6 @@ function setPlotAxis(a::FixedVar,axlist,fixedAxes,customobs,positionobs)
   end
 end
 
-import Interact: observe, Widget
-import InteractBase: throttle
 cart(i::Integer) = CartesianIndex((i,))
 
 function createWidgets(axlist,availableAxis,availableIndices,axlabels,widgets,axtuples,customobs,positionobs)
@@ -142,11 +121,6 @@ mygetval(i)=i
 mygetval(i::Observable)=i[]
 mygetval(i::FixedAx)=-1
 
-
-import Interact
-import InteractBase
-import Observables
-import Widgets
 function plotGeneric(plotObj::ESDLPlot, cube;kwargs...)
 
 
