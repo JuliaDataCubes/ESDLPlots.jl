@@ -1,7 +1,7 @@
 abstract type MAPPlot <: ESDLPlot end
 import Colors: Color
 using YAXArrayBase: getattributes
-import YAXArrays.Cubes.Axes: get_step, abshalf
+import YAXArrays.Cubes.Axes: get_step, abshalf, getAxis
 
 mutable struct MAPPlotRGB <: MAPPlot
   xaxis
@@ -102,7 +102,7 @@ function getXY2(p::Shapefile.Polygon)
         points[i0:iend]
     end
 end
-function getshapeplot(shapepath,userbb;npoly=100)
+function getshapeplot(shapepath,userbb)
     handle = open(shapepath, "r") do io
         read(io, Shapefile.Handle)
     end
@@ -116,8 +116,8 @@ function getshapeplot(shapepath,userbb;npoly=100)
         end
     end
     xys = Vector{Tuple{Float64,Float64}}[]
-    foreach(p) do pi
-      append!(xys,getXY2(pi))
+    foreach(p) do ip
+      append!(xys,getXY2(ip))
     end
     polBB = Compose.UnitBox(userbb.left,userbb.top,userbb.right-userbb.left, userbb.bottom-userbb.top)
     earthland = Compose.compose(context(units = polBB),Compose.line(xys))
@@ -158,12 +158,12 @@ function plotCall(p::MAPPlotContin, d, ixaxis, iyaxis, otherinds...)
   end
 end
 
-function interpretoverlay(overlay,xaxis,yaxis,axlist,npoly)
+function interpretoverlay(overlay,xaxis,yaxis,axlist)
   if overlay !== nothing
     xax,yax = getAxis(xaxis,axlist),getAxis(yaxis,axlist)
     xstep,ystep = get_step(xax.values),get_step(yax.values)
     userbb = (left = first(xax.values)-abshalf(xstep), right = last(xax.values)+abshalf(xstep), top = first(yax.values)-abshalf(ystep), bottom = last(yax.values)+abshalf(ystep))
-    overlay = getshapeplot(overlay,userbb,npoly=npoly)
+    overlay = getshapeplot(overlay,userbb)
   end
   overlay
 end
@@ -190,7 +190,7 @@ the name of the class represented.
 """
 function plotMAP(cube;xaxis="Lon", yaxis="Lat", dmin=zero(eltype(cube)),dmax=zero(eltype(cube)),
   colorm=:inferno,oceancol=colorant"darkblue",misscol=colorant"gray",symmetric=false, tickspos=[],im_only=false,
-  overlay=nothing,npoly = 100, kwargs...)
+  overlay=nothing, kwargs...)
 
   isa(colorm,Symbol) && (colorm=get(namedcolms,colorm,namedcolms[:inferno]))
   dmin,dmax=typed_dminmax(eltype(cube),dmin,dmax)
@@ -198,7 +198,7 @@ function plotMAP(cube;xaxis="Lon", yaxis="Lat", dmin=zero(eltype(cube)),dmax=zer
 
   props=getattributes(cube)
 
-  overlay = interpretoverlay(overlay, xaxis,yaxis,axlist,npoly)
+  overlay = interpretoverlay(overlay, xaxis,yaxis,axlist)
 
   if haskey(props,"labels")
     labels = props["labels"]
@@ -235,12 +235,12 @@ If a dimension is neither longitude or latitude and is not fixed through an addi
 function plotMAPRGB(cube;dmin=zero(eltype(cube)),dmax=zero(eltype(cube)),
   rgbaxis="Var",oceancol=colorant"darkblue",misscol=colorant"gray",symmetric=false,
   c1 = nothing, c2=nothing, c3=nothing, cType=XYZ, xaxis="Lon",yaxis="Lat",
-  overlay=nothing, npoly=100, kwargs...) where T
+  overlay=nothing, kwargs...) where T
 
-  dmin,dmax = typed_dminmax2(T,dmin,dmax)
+  dmin,dmax = typed_dminmax2(eltype(cube),dmin,dmax)
   axlist    = caxes(cube)
 
-  overlay = interpretoverlay(overlay,xaxis,yaxis,axlist,npoly)
+  overlay = interpretoverlay(overlay,xaxis,yaxis,axlist)
 
   irgb = findAxis(rgbaxis,axlist)
   if length(axlist[irgb])==3 && c1==nothing && c2==nothing && c3==nothing
